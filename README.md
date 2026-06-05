@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=180&color=0:0B1026,40:1E3A8A,75:FBBF24,100:FDE68A&text=Aurora&fontColor=ffffff&fontSize=60&animation=fadeIn&fontAlignY=38"/>
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=180&color=0:0B1026,30:7C3AED,60:EC4899,85:F97316,100:FDE047&text=Aurora&fontColor=ffffff&fontSize=60&animation=fadeIn&fontAlignY=38"/>
 
 # Aurora
 
