@@ -14,11 +14,11 @@ This document outlines the milestones, learning objectives, restrictions, and co
 * Do not use scikit-learn.
 
 ### Completion Criteria
-- [ ] The student can explain the model $y = ax + b$.
-- [ ] The student can explain mean squared error (MSE).
-- [ ] The student can manually derive the update direction (gradients).
-- [ ] The student can train a tiny model on synthetic data.
-- [ ] The student can write a short note explaining the result.
+- [x] The student can explain the model $y = ax + b$.
+- [x] The student can explain mean squared error (MSE).
+- [x] The student can manually derive the update direction (gradients).
+- [x] The student can train a tiny model on synthetic data.
+- [x] The student can write a short note explaining the result.
 
 ---
 
@@ -30,9 +30,10 @@ This document outlines the milestones, learning objectives, restrictions, and co
 * No high-level ML library.
 
 ### Completion Criteria
-- [ ] The student can explain what a neuron computes.
-- [ ] The student can explain why activation functions exist.
-- [ ] The student can train a single neuron on a toy dataset.
+- [x] The student can explain what a neuron computes.
+- [x] The student can explain why activation functions exist.
+- [x] The student can train a single neuron on a toy dataset.
+- [x] The code must be clean, optimised, and well‑structured; AI may pinpoint specific lines for improvement.
 
 ---
 
