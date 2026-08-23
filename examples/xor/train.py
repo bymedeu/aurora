@@ -37,6 +37,7 @@ class Network(object):
         self.sizes = sizes
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(x, y) for y, x in zip(sizes[:-1], sizes[1:])]
+        self.zs = [np.array(0) for _ in zip(sizes[:-1], sizes[1:])]
         """
         print(self.weights[0])
         print(self.biases[0])
@@ -45,14 +46,19 @@ class Network(object):
         """
 
     def feedforward(self, a):
-        for b, w in zip(self.biases, self.weights):
-            z = np.dot(w, a) + b
-            a = sigmoid(z)
+        for i, (b, w) in enumerate(zip(self.biases, self.weights)):
+            self.zs[i] = np.dot(w, a) + b
+            a = sigmoid(self.zs[i])
         return a
 
 
 nw = Network([2, 3, 1])
+bce = 0
 for row in np.asarray(X):
     sample = row.reshape(2, 1)
     pred = nw.feedforward(sample)
+    y = row[0] ^ row[1]
+    bce += y * np.log(pred) + (1 - y) * np.log(1 - pred)
     print(sample.T, pred)
+bce = -1 / len(X) * bce
+print("BCE: ", bce)
