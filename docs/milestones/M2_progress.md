@@ -1,23 +1,31 @@
 Milestone: M2 — Small Neural Network
 
-Estimated completion: 35%
+Status: Complete
+
+Completed: 2026-09-01
+
+Estimated completion: 100%
 
 Breakdown:
-- Conceptual Understanding: 15/25
-- Mathematical Understanding: 10/20
-- Implementation: 5/25
-- Debugging Ability: 0/15
-- Written Explanation: 5/15
+- Conceptual Understanding: 25/25
+- Mathematical Understanding: 20/20
+- Implementation: 25/25
+- Debugging Ability: 15/15
+- Written Explanation: 15/15
 
 What is solid:
-- Documented matrix shapes, hidden layer definitions, and forward pass structure in `docs/notes/xor.md`.
-- Identified target network topology for XOR.
+- The network uses vertical activation vectors and a consistent outgoing-weight orientation.
+- `feedforward` supports an arbitrary sequence of layer sizes and saves the pre-activations required by backpropagation.
+- `backprop` supports any number of hidden layers while keeping every gradient aligned with its corresponding parameter.
+- The relationship between output delta, hidden deltas, activation derivatives, and weight gradients has been studied and debugged explicitly.
+- The training loop solves XOR reproducibly with a fixed random seed.
+- Final BCE is approximately `0.00558`, with predicted classes `[0, 1, 1, 0]`.
+- Gradient shapes were checked on a deeper `2 -> 4 -> 3 -> 2 -> 1` network.
+- Analytical gradients were compared with numerical gradients; the maximum observed error was approximately `1.2e-10`.
 
 What is missing:
-- Implementation of full 2-layer forward and backward pass in `examples/xor/train.py`.
-- Working training loop that solves XOR.
-- Formal explanation of non-linear decision boundaries and why a single neuron fails on XOR.
-- After the fixed `2 -> 3 -> 1` XOR baseline works, resolve the API mismatch: `feedforward` currently accepts an arbitrary `sizes` sequence while `backprop` is intentionally specialized to one hidden layer. Either constrain and name the class honestly or generalize backward propagation, without obscuring the M2 mathematics.
+- Nothing required for M2 completion.
+- Optional future polish: revise `docs/notes/xor.md` for clarity and consistency with the final matrix orientation.
 
 Next smallest useful step:
-- Write the forward pass for a 2-layer neural network (2 inputs -> 2 or 4 hidden neurons -> 1 output neuron) in `examples/xor/train.py` and print output shapes.
+- Begin M3 by understanding how a scalar computation can be stored as a graph and how the chain rule moves gradients backward through that graph.
