@@ -64,8 +64,3 @@ class AutoNode:
         if other.value == 0:
             raise ZeroDivisionError
         return AutoNode(self.value / other.value, (self, other), division)
-
-    def backward(self, newval):
-        self.gradient = newval
-        # how can I do an "automatic" backward depending on the operation without having a switch?
-        self.operation(self)
