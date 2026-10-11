@@ -25,3 +25,10 @@ def backward(output: AutoNode):
     output.gradient = 1
     for n in reversed(L):
         n.operation(n)
+
+
+def clear_gradients(output: AutoNode):
+    L = engine(output)
+    n: AutoNode
+    for n in reversed(L):
+        n.gradient = 0
