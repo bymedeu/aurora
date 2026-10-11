@@ -1,13 +1,13 @@
 Milestone: M3 — Autograd
 
-Estimated completion: 74%
+Estimated completion: 78%
 
 Breakdown:
 - Conceptual Understanding: 18/25
 - Mathematical Understanding: 14/20
-- Implementation: 23/25
+- Implementation: 24/25
 - Debugging Ability: 11/15
-- Written Explanation: 8/15
+- Written Explanation: 11/15
 
 What is solid:
 - Scalar forward operations construct graph nodes with parent identity and local
@@ -20,14 +20,12 @@ What is solid:
   sigmoid are implemented.
 - Forward values are exposed through a read-only property so recorded graphs keep
   the values used by backward.
-- The local suite has 22 passing tests, including finite-difference comparisons
-  and sigmoid edge cases.
+- `aurora.autograd` exposes the intended public API, while its tests live outside
+  the source package and run through one repository-wide discovery command.
+- The local suite has 23 passing tests, including finite-difference comparisons,
+  sigmoid edge cases, and the read-only value contract.
 
 What is missing:
-- Add one focused regression test for the read-only value contract.
-- Make `aurora.autograd` importable as a package with a small public API; current
-  imports and test execution still assume the autograd directory is on sys.path.
-- Group tests under the repository test tree after the package boundary is clear.
 - Explain current traversal time and memory costs, including list membership and
   recursive depth limits.
 - Give a concise owner-authored account of graph construction, chain-rule
@@ -36,15 +34,16 @@ What is missing:
   PyTorch study in M4; this has not been demonstrated yet.
 
 Next smallest useful step:
-- Define the `aurora.autograd` package boundary and public imports without adding
-  neural-network abstractions.
+- Explain the current traversal complexity, then replace linear list membership
+  checks with explicit visiting and visited sets while preserving topological
+  order and cycle detection.
 
 Recommended resources:
-- Python documentation: Packages.
-- Python documentation: The import system.
+- Python documentation: Set Types.
+- Python documentation: Recursion and recursive functions.
 
 Do not do yet:
 - Do not add scalar neuron, optimizer, tensor, or transformer abstractions merely
   to expand the framework.
-- Do not optimize graph traversal before the package contract and remaining M3
-  evidence are settled.
+- Do not add optimizer, neuron, tensor, or training-loop abstractions before the
+  traversal contract and remaining M3 evidence are settled.

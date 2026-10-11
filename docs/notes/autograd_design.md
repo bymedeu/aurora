@@ -11,7 +11,7 @@ Recorded on 2026-10-11:
 - Discuss and obtain approval before changing README or roadmap priorities, completion criteria, or scoring values.
 - The owner prioritizes AI and systems engineering rather than a PhD. Keep writing and mathematics focused on explaining, debugging, and defending the implementation. No change to the existing milestone scoring has been approved.
 - Prefer Mermaid diagrams with TD direction.
-- Group test files later. Do not interrupt core M3 work with a broad test-layout refactor.
+- Keep verification outside the source package and provide one command that discovers the repository test suite.
 - Do not add demonstration files merely to expand the repository. A proposed standalone tiny-model example was declined.
 
 ## M3 learning objective
@@ -72,11 +72,20 @@ Earlier attempts exposed:
 
 The last local run on 2026-10-11 executed:
 
-python3 -B src/aurora/autograd/test.py
+python3 -B tests/run.py
 
-All 22 tests passed without overflow warnings. Coverage includes forward graph identity, local rule scaling and accumulation, repeated operands, shared intermediates, ordering, analytical and finite-difference gradients, gradient clearing, and sigmoid at large positive and negative finite inputs.
+All 23 tests passed without overflow warnings. The checker discovers every
+`test_*.py` module under `tests/` and adds the local `src/` directory to the
+import path. Coverage includes forward graph identity, local rule scaling and
+accumulation, repeated operands, shared intermediates, ordering, analytical and
+finite-difference gradients, gradient clearing, sigmoid at large positive and
+negative finite inputs, and the read-only value contract.
 
-Tests are assistant-authored verification artifacts. The owner must still explain the tested mechanisms and diagnose representative failures. M3 completion has not been declared; the original percentage placeholders have not been reassessed.
+Most tests are assistant-authored verification artifacts; the owner added the
+read-only value regression before the suite was reorganized. The owner must still
+explain the tested mechanisms and diagnose representative failures. M3 completion
+has not been declared; the progress estimate was reassessed after the package and
+test boundaries were completed.
 
 ## Value mutation and graph lifetime
 
@@ -102,10 +111,10 @@ Python does not provide C++-style absolute privacy. Direct modification of an
 implementation backing attribute remains outside the supported interface.
 
 Implementation status: the owner implemented an internal backing attribute and a
-read-only value property with no setter. On 2026-10-11 the full 22-test suite
-passed, and a separate manual check confirmed that public value reassignment raises
-AttributeError while gradients remain writable. A permanent regression test for
-this property contract has not yet been added.
+read-only value property with no setter. On 2026-10-11 the full 23-test suite
+passed. A permanent regression test confirms that public value reassignment raises
+AttributeError, leaves the recorded value unchanged, and does not prevent gradient
+mutation.
 
 Ordinary scalar-engine training calculates all updates after backward, creates the
 new parameter leaves, and then executes one fresh forward per next step or batch.

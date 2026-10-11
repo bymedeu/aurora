@@ -3,8 +3,8 @@
 import math
 import unittest
 
-from .engine import backward, clear_gradients, engine
-from .scalar_node import AutoNode
+from aurora.autograd import AutoNode, backward, clear_gradients
+from aurora.autograd.engine import engine
 
 
 class ScalarNodeTests(unittest.TestCase):
@@ -74,11 +74,12 @@ class ScalarNodeTests(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             b / a  # type: ignore
 
-    def test_create_autonode(self):
+    def test_value_is_read_only_while_gradient_remains_mutable(self):
         a = AutoNode(3)
         self.assertEqual(a.value, 3)
         with self.assertRaises(AttributeError):
             a.value = 8  # type: ignore
+        self.assertEqual(a.value, 3)
         a.gradient = 67
         self.assertEqual(a.gradient, 67)
 
