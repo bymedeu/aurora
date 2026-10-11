@@ -4,7 +4,7 @@ import math
 import unittest
 
 from aurora.autograd import AutoNode, backward, clear_gradients
-from aurora.autograd.engine import engine
+from aurora.autograd.engine import _topological_order
 
 
 class ScalarNodeTests(unittest.TestCase):
@@ -86,7 +86,7 @@ class ScalarNodeTests(unittest.TestCase):
 
 class GraphOrderingTests(unittest.TestCase):
     def assert_valid_order(self, output, expected_nodes):
-        order = engine(output)
+        order = _topological_order(output)
         identities = [id(node) for node in order]
         self.assertEqual(len(identities), len(set(identities)), "Duplicate node")
         self.assertEqual(set(identities), {id(node) for node in expected_nodes})

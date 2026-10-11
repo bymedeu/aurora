@@ -1,7 +1,7 @@
 from .scalar_node import AutoNode
 
 
-def engine(output: AutoNode):
+def _topological_order(output: AutoNode):
     L = []
     t = []
 
@@ -20,7 +20,7 @@ def engine(output: AutoNode):
 
 
 def backward(output: AutoNode):
-    L = engine(output)
+    L = _topological_order(output)
     n: AutoNode
     output.gradient = 1
     for n in reversed(L):
@@ -28,7 +28,7 @@ def backward(output: AutoNode):
 
 
 def clear_gradients(output: AutoNode):
-    L = engine(output)
+    L = _topological_order(output)
     n: AutoNode
     for n in reversed(L):
         n.gradient = 0

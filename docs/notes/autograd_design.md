@@ -34,13 +34,17 @@ Parent connections preserve object identity. Two nodes with equal values are dis
 
 ## Traversal and backward
 
-engine(output) discovers reachable nodes and produces a parent-before-result order. backward(output) seeds the output gradient with one, then executes local callables in reverse order.
+_topological_order(output) discovers reachable nodes and produces a
+parent-before-result order. backward(output) seeds the output gradient with one,
+then executes local callables in reverse order.
 
 The engine is generic: it does not contain neuron, prediction, loss, or activation derivative logic. Forward graph construction does not call the traversal helper.
 
 Current traversal uses lists for active and completed membership checks. For these unary and binary scalar graphs, repeated linear searches can make traversal quadratic in node count. Set-based bookkeeping is deferred until correctness and understanding are established. The graph and traversal storage scale with nodes and edges; recursive traversal is also limited by Python recursion depth.
 
-The current helper name is engine. Renaming it to _topological_order was proposed but has not been adopted.
+The traversal helper is named _topological_order. The leading underscore marks it
+as an internal implementation detail used by backward and gradient clearing,
+rather than part of the public aurora.autograd API.
 
 ## Gradient lifecycle
 
