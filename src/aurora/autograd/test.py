@@ -74,6 +74,14 @@ class ScalarNodeTests(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             b / a  # type: ignore
 
+    def test_create_autonode(self):
+        a = AutoNode(3)
+        self.assertEqual(a.value, 3)
+        with self.assertRaises(AttributeError):
+            a.value = 8  # type: ignore
+        a.gradient = 67
+        self.assertEqual(a.gradient, 67)
+
 
 class GraphOrderingTests(unittest.TestCase):
     def assert_valid_order(self, output, expected_nodes):
@@ -270,7 +278,9 @@ class SigmoidTests(unittest.TestCase):
                 error = z.sigmoid() - AutoNode(0.3)
                 loss = error * error
                 backward(loss)
-                expected = (numeric_loss(value + epsilon) - numeric_loss(value - epsilon)) / (2 * epsilon)
+                expected = (
+                    numeric_loss(value + epsilon) - numeric_loss(value - epsilon)
+                ) / (2 * epsilon)
                 self.assertAlmostEqual(z.gradient, expected, delta=1e-8)
 
     def test_large_finite_inputs_have_finite_outputs_and_gradients(self):
