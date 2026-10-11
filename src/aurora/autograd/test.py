@@ -3,8 +3,8 @@
 import math
 import unittest
 
-from engine import backward, clear_gradients, engine
-from scalar_node import AutoNode
+from .engine import backward, clear_gradients, engine
+from .scalar_node import AutoNode
 
 
 class ScalarNodeTests(unittest.TestCase):

@@ -1,4 +1,4 @@
-from scalar_node import AutoNode
+from .scalar_node import AutoNode
 
 
 def engine(output: AutoNode):
