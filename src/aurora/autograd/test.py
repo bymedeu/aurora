@@ -1,8 +1,9 @@
 """Checks for local derivative rules, graph ordering, and backward execution."""
 
+import math
 import unittest
 
-from engine import backward, engine
+from engine import backward, clear_gradients, engine
 from scalar_node import AutoNode
 
 
@@ -71,7 +72,7 @@ class ScalarNodeTests(unittest.TestCase):
         self.assertAlmostEqual(a.gradient, 1.25)
         self.assertAlmostEqual(b.gradient, 0)
         with self.assertRaises(ZeroDivisionError):
-            b / a
+            b / a  # type: ignore
 
 
 class GraphOrderingTests(unittest.TestCase):
@@ -161,8 +162,12 @@ class BackwardEngineTests(unittest.TestCase):
                 output = expression(a, b)
                 output.gradient = 1
                 backward(output)
-                expected_a = (expression(av + epsilon, bv) - expression(av - epsilon, bv)) / (2 * epsilon)
-                expected_b = (expression(av, bv + epsilon) - expression(av, bv - epsilon)) / (2 * epsilon)
+                expected_a = (
+                    expression(av + epsilon, bv) - expression(av - epsilon, bv)
+                ) / (2 * epsilon)
+                expected_b = (
+                    expression(av, bv + epsilon) - expression(av, bv - epsilon)
+                ) / (2 * epsilon)
                 self.assertAlmostEqual(a.gradient, expected_a, delta=1e-6)
                 self.assertAlmostEqual(b.gradient, expected_b, delta=1e-6)
 
@@ -177,6 +182,107 @@ class BackwardEngineTests(unittest.TestCase):
         second.gradient = 1
         backward(second)
         self.assertEqual(a.gradient, 8)
+
+
+class GradientClearingTests(unittest.TestCase):
+    def test_clears_reachable_gradients_and_preserves_graph(self):
+        a, b = AutoNode(2), AutoNode(3)
+        shared = a * b
+        output = shared + shared
+        unrelated = AutoNode(7)
+        unrelated.gradient = 19
+        nodes = (a, b, shared, output)
+        saved = [(node.value, node.parents, node.operation) for node in nodes]
+        backward(output)
+
+        clear_gradients(output)
+
+        for node, (value, parents, operation) in zip(nodes, saved):
+            self.assertEqual(node.gradient, 0)
+            self.assertEqual(node.value, value)
+            self.assertIs(node.parents, parents)
+            self.assertIs(node.operation, operation)
+        self.assertEqual(unrelated.gradient, 19)
+
+    def test_backward_after_clearing_reproduces_shared_graph_gradients(self):
+        a = AutoNode(3)
+        square = a * a
+        output = square + square
+        backward(output)
+        self.assertEqual((a.gradient, square.gradient, output.gradient), (12, 2, 1))
+
+        for _ in range(2):
+            clear_gradients(output)
+            backward(output)
+            self.assertEqual((a.gradient, square.gradient, output.gradient), (12, 2, 1))
+
+    def test_leaf_output_and_repeated_clearing(self):
+        leaf = AutoNode(4)
+        backward(leaf)
+        clear_gradients(leaf)
+        self.assertEqual(leaf.gradient, 0)
+        clear_gradients(leaf)
+        self.assertEqual(leaf.gradient, 0)
+        self.assertEqual(leaf.value, 4)
+        backward(leaf)
+        self.assertEqual(leaf.gradient, 1)
+
+
+class SigmoidTests(unittest.TestCase):
+    def test_forward_value_and_parent_connection(self):
+        z = AutoNode(0)
+        result = z.sigmoid()
+        self.assertIsInstance(result, AutoNode)
+        self.assertIsNot(result, z)
+        self.assertEqual(result.value, 0.5)
+        self.assertEqual(result.gradient, 0)
+        self.assertEqual(len(result.parents), 1)
+        self.assertIs(result.parents[0], z)
+
+    def test_local_rule_scales_and_accumulates_incoming_gradient(self):
+        for incoming in (0, 1, 8, -3):
+            with self.subTest(incoming=incoming):
+                z = AutoNode(0)
+                result = z.sigmoid()
+                z.gradient = 7
+                result.gradient = incoming
+                result.operation(result)
+                self.assertEqual(z.gradient, 7 + incoming * 0.25)
+                self.assertEqual((z.value, result.value), (0, 0.5))
+
+    def test_shared_sigmoid_result_receives_all_contributions(self):
+        z = AutoNode(0)
+        s = z.sigmoid()
+        output = s * s + s
+        backward(output)
+        self.assertEqual(s.gradient, 2)
+        self.assertEqual(z.gradient, 0.5)
+
+    def test_composed_gradient_matches_finite_differences(self):
+        def numeric_loss(z):
+            s = 0.5 * (1 + math.tanh(z / 2))
+            return (s - 0.3) ** 2
+
+        epsilon = 1e-6
+        for value in (-3.0, -0.5, 0.0, 1.5, 3.0):
+            with self.subTest(value=value):
+                z = AutoNode(value)
+                error = z.sigmoid() - AutoNode(0.3)
+                loss = error * error
+                backward(loss)
+                expected = (numeric_loss(value + epsilon) - numeric_loss(value - epsilon)) / (2 * epsilon)
+                self.assertAlmostEqual(z.gradient, expected, delta=1e-8)
+
+    def test_large_finite_inputs_have_finite_outputs_and_gradients(self):
+        for value, expected in ((-1000.0, 0.0), (1000.0, 1.0)):
+            with self.subTest(value=value):
+                z = AutoNode(value)
+                result = z.sigmoid()
+                self.assertTrue(math.isfinite(result.value))
+                self.assertEqual(result.value, expected)
+                backward(result)
+                self.assertTrue(math.isfinite(z.gradient))
+                self.assertAlmostEqual(z.gradient, 0.0, delta=1e-12)
 
 
 if __name__ == "__main__":
