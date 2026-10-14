@@ -83,16 +83,17 @@ Earlier attempts exposed:
 
 ## Validation evidence
 
-The last local run on 2026-10-11 executed:
+The last local run on 2026-10-14 executed:
 
 python3 -B tests/run.py
 
-All 23 tests passed without overflow warnings. The checker discovers every
+All 24 tests passed without overflow warnings. The checker discovers every
 `test_*.py` module under `tests/` and adds the local `src/` directory to the
 import path. Coverage includes forward graph identity, local rule scaling and
 accumulation, repeated operands, shared intermediates, ordering, analytical and
 finite-difference gradients, gradient clearing, sigmoid at large positive and
-negative finite inputs, and the read-only value contract.
+negative finite inputs, the read-only value contract, and cycle rejection before
+gradient mutation.
 
 Most tests are assistant-authored verification artifacts; the owner added the
 read-only value regression before the suite was reorganized. The owner must still
@@ -124,7 +125,7 @@ Python does not provide C++-style absolute privacy. Direct modification of an
 implementation backing attribute remains outside the supported interface.
 
 Implementation status: the owner implemented an internal backing attribute and a
-read-only value property with no setter. On 2026-10-11 the full 23-test suite
+read-only value property with no setter. On 2026-10-14 the full 24-test suite
 passed. A permanent regression test confirms that public value reassignment raises
 AttributeError, leaves the recorded value unchanged, and does not prevent gradient
 mutation.
