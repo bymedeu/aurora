@@ -145,3 +145,20 @@ the M3 scalar engine.
 The controlling M3 contract requires a scalar graph with backward and explanations of the chain rule, traversal, accumulation, ownership, complexity, and conceptual relation to PyTorch autograd.
 
 A tensor engine, optimizer class, full neuron framework, transformer, broad activation catalogue, and additional standalone examples are not M3 completion requirements. Future useful neural-network computation should build on the generic differentiation mechanism without model-specific logic in the traversal engine.
+
+## Practical continuation and package responsibilities
+
+The owner reaffirmed the preference for reusable Aurora code rather than another
+standalone training example. The earlier suggestion to add train_autograd.py and
+the progress entry describing a learning loop as missing work were assistant
+proposals, not requirements from the roadmap. A new training example is not
+required to complete M3.
+
+The proposed next integration step is a mean_squared_error function in
+src/aurora/nn/losses.py. Its name describes the mathematical quantity and its
+module describes the reusable responsibility. It would construct a loss graph
+using existing AutoNode operations; backward would derive gradients through that
+composition. Dataset selection, printing, epoch counts, and training orchestration
+do not belong in the generic autograd traversal package. The scalar loss API is
+bounded to the current scalar engine; a future tensor loss can use the same
+mathematical definition without requiring identical implementation details.
