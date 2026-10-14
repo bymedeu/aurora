@@ -68,6 +68,20 @@ class AutoNode:
             raise ZeroDivisionError
         return AutoNode(self.value / other.value, (self, other), op_division)
 
+    def __pow__(self, exp: int):
+        if not isinstance(exp, int):
+            raise TypeError("Exponent must be an integer")
+        if exp < 0:
+            raise ValueError("Exponent must be non-negative")
+        par = AutoNode(1)
+        b = self
+        while exp > 0:
+            if exp & 1:
+                par = par * b
+            b = b * b
+            exp >>= 1
+        return par
+
     def sigmoid(self):
         if self.value >= 0:
             value = 1.0 / (1.0 + exp(-self.value))
