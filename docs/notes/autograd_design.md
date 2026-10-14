@@ -14,6 +14,35 @@ Recorded on 2026-10-11:
 - Keep verification outside the source package and provide one command that discovers the repository test suite.
 - Do not add demonstration files merely to expand the repository. A proposed standalone tiny-model example was declined.
 
+## Learning ownership and approved supporting work
+
+The owner implements the AI mechanisms that Aurora exists to teach. Necessary
+supporting code should still be correct and usable, but routine maintenance must
+not displace the active learning objective. The assistant may propose handling
+input validation, imports, packaging, test infrastructure, or organization when
+doing so improves the project without removing meaningful learning.
+
+Every source or test edit still requires explicit approval for its specific scope.
+An invitation to propose assistance is not permission to apply the edit. Before
+seeking approval, explain the defect or responsibility, the bounded proposed change,
+and how it will be verified. Existing authorization for a specific task remains
+valid; do not repeatedly ask for the same approved work.
+
+Show proposed code edits directly in fenced code blocks in the conversation,
+with their affected files and scope, rather than linking to temporary patch files.
+
+When personally implementing a supporting function would develop valuable AI,
+systems, or engineering judgment toward the owner's career goals, explain that
+value and recommend owner implementation. Do not frame minor housekeeping as an
+employer requirement or count assistant-written code as owner implementation
+mastery. The distinction depends on learning value, not merely on whether a
+function is located under src.
+
+Current example: the owner approved assistant-written checks for unsupported power
+arguments and the MSE package import correction. Power composition, graph
+preservation, loss construction, and the meaning of gradients remain owner learning
+work. Both supporting fixes are applied, and the full 33-test suite passes.
+
 ## M3 learning objective
 
 For M3, the central learning target is the lifecycle of dynamic reverse-mode
@@ -162,3 +191,35 @@ composition. Dataset selection, printing, epoch counts, and training orchestrati
 do not belong in the generic autograd traversal package. The scalar loss API is
 bounded to the current scalar engine; a future tensor loss can use the same
 mathematical definition without requiring identical implementation details.
+
+## Power composition and MSE verification
+
+The owner implemented __pow__ by repeated squaring, composing existing AutoNode
+multiplications rather than adding a dedicated power backward rule. Consequently,
+parent references and multiplication callbacks retain the differentiation graph;
+there is no separate exponent metadata required by backward. For positive integer
+exponents, the composition takes O(log n) multiplication operations.
+
+The requested tests cover squares, cubes, fifteenth powers, additional integer
+exponents, negative and zero bases, scaling of incoming gradients, accumulation,
+shared computations, and a composed finite-difference comparison. All eight power
+tests pass, including the zero-exponent convention that x ** 0 returns a
+constant-one node. Runtime guards reject non-integer exponents with TypeError and
+negative integer exponents with ValueError. These checks were assistant-written
+with explicit approval; the power composition itself was owner-written.
+
+An additional integration test constructs two predictions from shared weight and
+bias nodes and checks the MSE value and gradients back to both parameters. It
+passes after the approved package import correction. For weight 2, bias 1, inputs
+[1, 3], and targets [5, 6], the loss is 2.5, prediction gradients are [-2, 1],
+weight gradient is 1, and bias gradient is -1. The MSE graph construction was
+owner-written; its package import correction was assistant-written with approval.
+The integration check covers a valid non-empty batch; it is not evidence of a
+completed policy for empty or mismatched inputs.
+
+The latest full checker run passes all 33 tests: 24 existing autograd tests,
+eight power tests, and one MSE integration test. This supersedes the initial
+verification run with four failing unsupported-input subtests and one import
+error. The next learning step is interpreting and using the validated parameter
+gradients for a gradient-descent update with fresh parameter leaves, rather than
+extending the operation catalogue or adding a new standalone training example.

@@ -24,8 +24,12 @@ What is solid:
   the values used by backward.
 - `aurora.autograd` exposes the intended public API, while its tests live outside
   the source package and run through one repository-wide discovery command.
-- The local suite has 24 passing tests, including finite-difference comparisons,
-  sigmoid edge cases, the read-only value contract, and cycle rejection.
+- The local suite has 33 passing tests, including finite-difference comparisons,
+  sigmoid edge cases, the read-only value contract, cycle rejection, integer
+  powers, and MSE gradients reaching model parameters.
+- Power arguments are checked at runtime; the assistant added validation and
+  corrected the MSE package import with explicit approval. The power composition
+  and differentiable MSE calculation were implemented by the owner.
 
 What is missing:
 - Give a concise owner-authored account of graph construction, chain-rule
@@ -34,10 +38,10 @@ What is missing:
   PyTorch study in M4; this has not been demonstrated yet.
 
 Next smallest useful step:
-- Proposed practical continuation: implement a reusable differentiable
-  mean_squared_error function in src/aurora/nn/losses.py, composing existing
-  AutoNode operations. Verify its values and parameter gradients with focused
-  tests. This is an integration step, not an added roadmap completion criterion.
+- Interpret the verified MSE parameter gradients and use them for one
+  gradient-descent update with fresh parameter leaves. Recalculate the loss to
+  connect the graph mechanism to learning, without adding a standalone training
+  script or optimizer class.
 
 Recommended resources:
 - The existing M0 mean-squared-error definition in docs/notes/linear_regression.md.
