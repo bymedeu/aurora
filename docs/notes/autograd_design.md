@@ -40,7 +40,16 @@ then executes local callables in reverse order.
 
 The engine is generic: it does not contain neuron, prediction, loss, or activation derivative logic. Forward graph construction does not call the traversal helper.
 
-Current traversal uses lists for active and completed membership checks. For these unary and binary scalar graphs, repeated linear searches can make traversal quadratic in node count. Set-based bookkeeping is deferred until correctness and understanding are established. The graph and traversal storage scale with nodes and edges; recursive traversal is also limited by Python recursion depth.
+Current traversal keeps the ordered result in a list and uses separate visiting and
+visited sets for membership checks. Each reachable node is completed once and each
+parent edge is followed once, giving average O(V + E) traversal time and O(V)
+additional bookkeeping space. Recursive traversal remains limited by Python's
+recursion depth.
+
+Encountering a node already in the visiting set proves that the current parent
+path contains a cycle. The traversal raises ValueError because a cyclic graph has
+no topological order. backward requests the order before seeding the output
+gradient, so cycle rejection does not partially execute that backward call.
 
 The traversal helper is named _topological_order. The leading underscore marks it
 as an internal implementation detail used by backward and gradient clearing,

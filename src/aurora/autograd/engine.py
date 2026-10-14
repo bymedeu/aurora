@@ -2,21 +2,24 @@ from .scalar_node import AutoNode
 
 
 def _topological_order(output: AutoNode):
-    L = []
-    t = []
+    order = []
+    visiting = set()
+    visited = set()
 
     def visit(node: AutoNode):
-        if node in t or node in L:
+        if node in visited:
             return
-        t.append(node)
+        if node in visiting:
+            raise ValueError("Autograd graph contains a cycle")
+        visiting.add(node)
         for p in node.parents:
             visit(p)
-
-        L.append(node)
-        t.remove(node)
+        visiting.remove(node)
+        visited.add(node)
+        order.append(node)
 
     visit(output)
-    return L
+    return order
 
 
 def backward(output: AutoNode):

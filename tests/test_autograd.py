@@ -118,6 +118,16 @@ class GraphOrderingTests(unittest.TestCase):
         self.assert_valid_order(squared, (a, squared))
         self.assert_valid_order(a, (a,))
 
+    def test_cycle_is_rejected_before_backward_mutates_gradients(self):
+        output = AutoNode(3)
+        output.parents = (output,)
+        output.gradient = 7
+
+        with self.assertRaisesRegex(ValueError, "cycle"):
+            backward(output)
+
+        self.assertEqual(output.gradient, 7)
+
 
 class BackwardEngineTests(unittest.TestCase):
     def test_fresh_leaf_output_is_seeded(self):
