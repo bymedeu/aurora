@@ -1,13 +1,20 @@
 Milestone: M3 — Autograd
 
-Estimated completion: 80%
+Progress assessment: reassessment required. The previous assistant-estimated 80%
+is withdrawn because it overstated owner understanding based on working code and
+assistant-assembled integration checks.
 
-Breakdown:
-- Conceptual Understanding: 18/25
-- Mathematical Understanding: 14/20
-- Implementation: 25/25
-- Debugging Ability: 12/15
-- Written Explanation: 11/15
+Competency evidence:
+- Conceptual understanding: the owner reports feeling lost about how components
+  form a complete usable model. Resolve this before assigning a percentage.
+- Mathematical understanding: local derivative discussions exist, but independent
+  end-to-end explanation is not yet established.
+- Implementation: the inspected components pass their existing tests, and direct
+  integration checks show learning; this is not proof of independent mastery.
+- Debugging ability: owner corrections and assistant-authored checks provide
+  partial evidence; do not infer a competency score from a green suite.
+- Written explanation: assistant-maintained design notes are engineering records,
+  not owner-authored explanation evidence.
 
 What is solid:
 - Scalar forward operations construct graph nodes with parent identity and local
@@ -36,17 +43,22 @@ What is solid:
   evidence, not a new persistent test or proof of owner conceptual mastery.
 
 What is missing:
+- A visible, runnable Aurora program connecting the implemented components, and
+  owner understanding of its data, model parameters, training, and predictions.
 - Give a concise owner-authored account of graph construction, chain-rule
   propagation, accumulation, graph lifetime, and known limitations.
 - Compare the learned concepts with PyTorch autograd after the first bounded
   PyTorch study in M4; this has not been demonstrated yet.
 
 Next smallest useful step:
-- Trace how the shared weight and bias receive contributions from two squared
-  errors, including the averaging factor, and explain why the next forward uses
-  fresh parameter leaves. Then complete the bounded conceptual comparison with
-  PyTorch autograd required by the roadmap; do not add further engine features
-  merely to postpone the remaining explanation work.
+- Resume from the M3 return brief at the top of docs/notes/autograd_design.md:
+  understand the four distinct roles (data, model, learned state, training), then
+  implement and explain one complete update in the owner-created entrypoint.
+- Guide the owner in implementing a visible Aurora prototype that connects the
+  existing components and can train and predict. The owner created an empty
+  src/aurora/__main__.py; they own its implementation. Explain and agree on the
+  design before assigning implementation details. Do not interpret agreement on
+  the goal or "let's go" as authorization for assistant-written source.
 
 Recommended resources:
 - The existing M0 mean-squared-error definition in docs/notes/linear_regression.md.
@@ -55,5 +67,6 @@ Recommended resources:
 Do not do yet:
 - Do not add scalar neuron, optimizer, tensor, or transformer classes merely
   to expand the framework.
-- Do not add optimizer, neuron, tensor, or training-loop abstractions. Keep the
-  composition of the loss graph explicit and inspectable.
+- Do not add a generic training framework or optimizer classes. A concrete,
+  inspectable fitting function may connect the existing components when needed
+  for understanding; keep prediction, loss, backward, and update visible.

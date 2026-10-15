@@ -2,6 +2,134 @@
 
 Aurora M3 develops a scalar reverse-mode differentiation engine. This log records implementation contracts, validation evidence, owner preferences, and unresolved design questions. It is assistant-maintained engineering documentation, not owner-authored evidence of mathematical mastery.
 
+## M3 return brief — 2026-10-15
+
+### Session objective and ownership
+
+The next owner coding session should connect the existing components into one
+visible prototype in src/aurora/__main__.py. That file currently exists and is
+empty. The owner writes it; the assistant explains, reviews, and verifies it.
+Agreement with a goal does not authorize assistant source edits. Do not introduce
+more isolated operations, package reorganizations, or an automatic training
+framework before the owner can follow the complete learning calculation.
+
+### What M3 is and why it matters
+
+M3 is scalar reverse-mode automatic differentiation. It records a calculation as
+it executes, then propagates derivatives backward through that recorded structure.
+It supplies gradients for learning; it does not itself select a model or target,
+choose an update rule, or make a trained model appear automatically.
+
+In M0–M2, parameter-gradient formulas were written for particular calculations.
+M3's capability is that supported operations can be composed differently while
+the same backward engine calculates the resulting gradients. Changing wx + b to
+(wx + b)^3, for example, does not require a new model-specific backpropagation
+function. Existing operation rules and graph connections supply the chain rule.
+The significance is this reusable mechanism, not the number or length of functions.
+
+### Four distinct things in the prototype
+
+| Thing | Meaning | Where it lives |
+| --- | --- | --- |
+| Data | Known inputs and observed target answers. | Lists chosen by the prototype caller; values enter the graph as leaves. |
+| Model | The chosen form prediction = w*x + b. | The forward expression in the prototype. |
+| Learned state | The current numerical values of w and b. | Parameter AutoNode objects referenced by the caller. |
+| Training procedure | Repeated evaluation, differentiation, and parameter updates. | The prototype caller using the existing library functions. |
+
+For the first controlled case, use inputs [-2, -1, 0, 1, 2] and target answers
+[-3, -1, 1, 3, 5]. The answers follow 2x + 1, but w and b must start at zero.
+The model receives the observations, not the target-generating formula or the
+answer coefficients. It learns coefficients within the chosen model form; it
+does not learn an arbitrary program or decide the model architecture.
+
+After training, the relation is represented by the learned coefficients plus the
+forward expression. There is no stored string "2x + 1" that the engine executes.
+Parameters remain in memory while the prototype runs; saving/loading a model is
+not implemented. Prediction on a new input uses those coefficients without a
+target, loss, backward pass, or update.
+
+### How the mechanism works
+
+1. Forward node arithmetic computes numerical values and creates result nodes
+   with immediate parents and operation-specific backward behavior. Predictions
+   and the MSE loss are part of this same recorded graph.
+2. backward seeds loss.gradient with 1 because the derivative of loss with
+   respect to itself is 1. The traversal supplies a reverse topological order.
+3. Each operation accumulates its incoming gradient multiplied by its local
+   derivative into its parents. Contributions from different paths add. This is
+   how parameters shared by multiple predictions receive all sample contributions.
+4. Parameter.gradient means the derivative of the final loss with respect to
+   that parameter. It is neither the parameter value nor an automatic new value.
+5. gradient_descent_step reads the selected parameters' values and gradients,
+   computes new numerical values, and returns fresh parameter leaves. Those new
+   leaves are the model state for the next forward calculation.
+
+Graph construction belongs to autograd/scalar_node.py; traversal and backward
+belong to autograd/engine.py. nn/losses.py defines the MSE calculation, and
+optim/gradient_descent.py defines the update. The caller connects them. Folders
+do not execute each other automatically. Tests exercise these responsibilities;
+they do not add hidden learning logic to the library.
+
+Parameters and intermediates are fresh each step under the chosen immutable-value
+policy, so the prototype does not need to clear an old graph before moving to a
+new one. Repeating backward on the same old graph without clearing is a different,
+unsupported accumulation usage. Keep inputs and targets out of the parameter
+update even though they also use AutoNode as their representation.
+
+### The owner implementation task, expressed as behavior
+
+The prototype must own the data and current parameters, build predictions and a
+loss using the existing operations, request gradients, retain the returned updated
+parameters, and eventually predict for a new input. Keep these responsibilities
+visible in one place. Do not rewrite derivatives or initialize parameters to the
+known answer. A command-line parser is not needed for the first learning step.
+
+Begin with one complete update. These are independent reference values for the
+five-pair dataset above, zero initial parameters, and learning rate 0.1:
+
+| Observable | Expected value |
+| --- | --- |
+| Initial predictions | [0, 0, 0, 0, 0] |
+| Initial mean squared error | 9 |
+| Gradients after backward | weight: -8; bias: -2 |
+| Updated parameter values | weight: 0.8; bias: 0.2 |
+| Loss from a fresh forward after the update | 3.52 |
+
+These are checkpoints to explain and verify, not constants to put into the update.
+The first-session target is being able to run and explain this complete step.
+
+Once that is understood, repeat the same procedure. In the assistant's prior
+50-update check, weight approached 2, bias approached 1, and MSE reached about
+2.04e-10. A held-out input 4 then predicts approximately 9. The prototype should
+be runnable from the repository root with PYTHONPATH=src python3 -B -m aurora
+after the owner implements its entrypoint. Merely having an empty __main__.py
+does not provide that behavior yet.
+
+### Readiness and remaining milestone evidence
+
+Use the running prototype to explain the distinction between data, model state,
+forward calculation, derivative calculation, and update. Be able to trace one
+operation's chain-rule contribution and a shared parameter's accumulated gradient,
+and explain why the next calculation uses fresh leaves. Traversal costs average
+O(V + E) time and O(V) additional space; scalar graph construction also costs
+objects and references per recorded operation, and recursion depth remains a limit.
+
+Existing tests verify local rules, graph ordering, finite-difference agreement,
+and MSE-to-parameter connections. New prototype verification should check the
+owner's implementation rather than impose an assistant-written architecture.
+The current valid-batch MSE check does not establish a full invalid-input policy.
+
+Before declaring M3 complete, retain a short owner-authored explanation and make
+the bounded conceptual comparison with PyTorch autograd named in the roadmap.
+A running prototype is evidence of integration, not an automatic competency score.
+Do not assign a new percentage until owner understanding has been reassessed.
+
+The longer-term goal is one usable prototype whose capabilities improve with each
+milestone. A future "from aurora import Aurora" interface may expose model creation,
+training, and prediction after those responsibilities are understood. It is a
+direction to discuss, not the next source class to implement or an authorization
+for the assistant to build it.
+
 ## M3 working preferences
 
 Recorded on 2026-10-11:
@@ -305,3 +433,62 @@ multiple samples accumulate into shared parameters, how graph lifetime relates t
 updates, and the roadmap's bounded conceptual comparison with PyTorch autograd.
 The successful numerical run does not by itself establish those competencies or
 justify adding more framework features.
+
+## Making the training caller visible to the owner
+
+The owner reports that seeing isolated source functions and an assistant-assembled
+test or terminal learning loop does not establish understanding of how they work
+together. Do not treat those successful checks as a substitute for owner-created
+integration. Explain where data, model state, and orchestration live before
+assigning more components or assessing conceptual mastery.
+
+In the repeated-learning verification, 2x + 1 was only the rule used to generate
+target data. The trainable model was wx + b, with w and b initialized to zero.
+The training procedure received input/target pairs and adjusted those parameter
+leaves; it did not receive or store the target-generating formula. The MSE unit
+test's initial w = 2 and b = 1 are a separate, deliberately chosen gradient-check
+case, not evidence of learning from initialization.
+
+Proposed next owner implementation: a concrete fit_linear_regression function in
+src/aurora/training.py receiving inputs, targets, learning rate, and update count,
+and returning the learned weight and bias nodes. The module's responsibility is
+coordinating existing prediction arithmetic, MSE, backward, and parameter update.
+It is not another isolated example, a new autograd operation, or a generic
+training framework. Keep the mathematical model form and the existing function
+calls visible. No new source file was created by the assistant for this proposal.
+
+## Owner correction of progress and integration priority
+
+On 2026-10-15 the owner explicitly rejected the previous 80% understanding estimate
+and reported feeling lost despite the working individual functions. The estimate
+has been withdrawn pending reassessment. Successful assistant-run integration and
+assistant-written notes must not be converted into owner understanding scores.
+
+The owner wants a working Aurora program that visibly connects the components.
+The proposed training helper above is superseded as the immediate next step by a
+minimal executable entrypoint in src/aurora/__main__.py: use the existing scalar
+model arithmetic, MSE, backward, and fresh-leaf update to train and then predict
+for a supplied input. Explain where the known dataset, unknown parameters, and
+training procedure live in that program. Avoid adding a model hierarchy, generic
+trainer, or more disconnected functions to address this gap.
+
+The owner will implement the prototype. On 2026-10-15 the assistant incorrectly
+interpreted agreement to proceed as approval to implement the entrypoint. The
+owner explicitly corrected this: wanting a prototype and saying "let's go" do not
+authorize assistant-written source. The assistant restored the owner's empty
+entrypoint and removed its own implementation-specific prototype tests. No core
+components or committed source were changed by this restoration.
+
+Outside docs and tests, require an unambiguous request for the assistant to edit
+the specific code. For supporting work with little AI-learning value, propose a
+bounded edit and wait for explicit approval; do not infer delegation merely
+because the work seems routine. The prototype's model/training integration is
+owner learning work and must not be implemented on their behalf without a new
+explicit request.
+
+The owner wants one evolving, usable prototype with meaningful behavior at each
+milestone, and may later want an external consumer or tests using
+"from aurora import Aurora". This is a desired direction, not authorization to add
+a new facade class, project, or source API now. Relate M3's meaningful behavior to
+training through automatic gradients and understanding the complete caller,
+rather than counting helper functions or using green tests as proof of mastery.
