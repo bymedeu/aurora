@@ -30,6 +30,10 @@ What is solid:
 - Power arguments are checked at runtime; the assistant added validation and
   corrected the MSE package import with explicit approval. The power composition
   and differentiable MSE calculation were implemented by the owner.
+- The owner implemented gradient_descent_step using fresh parameter leaves. A
+  direct 50-update check learning y = 2x + 1 reduced MSE from 9 to approximately
+  2.04e-10, with weight approaching 2 and bias approaching 1. This is execution
+  evidence, not a new persistent test or proof of owner conceptual mastery.
 
 What is missing:
 - Give a concise owner-authored account of graph construction, chain-rule
@@ -38,10 +42,11 @@ What is missing:
   PyTorch study in M4; this has not been demonstrated yet.
 
 Next smallest useful step:
-- Interpret the verified MSE parameter gradients and use them for one
-  gradient-descent update with fresh parameter leaves. Recalculate the loss to
-  connect the graph mechanism to learning, without adding a standalone training
-  script or optimizer class.
+- Trace how the shared weight and bias receive contributions from two squared
+  errors, including the averaging factor, and explain why the next forward uses
+  fresh parameter leaves. Then complete the bounded conceptual comparison with
+  PyTorch autograd required by the roadmap; do not add further engine features
+  merely to postpone the remaining explanation work.
 
 Recommended resources:
 - The existing M0 mean-squared-error definition in docs/notes/linear_regression.md.

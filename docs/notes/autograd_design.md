@@ -223,3 +223,85 @@ verification run with four failing unsupported-input subtests and one import
 error. The next learning step is interpreting and using the validated parameter
 gradients for a gradient-descent update with fresh parameter leaves, rather than
 extending the operation catalogue or adding a new standalone training example.
+
+## M3 responsibility map and gradient-descent review
+
+Explain each component's purpose and its relationship to the training calculation
+before assigning implementation work. Folder names organize responsibilities;
+they are not automatically executed stages or additional milestone requirements.
+
+- src/aurora/autograd owns scalar graph construction, local backward rules,
+  traversal, and gradient clearing. It does not choose a model, objective, or
+  parameter update rule.
+- src/aurora/nn currently owns the differentiable MSE loss. It composes existing
+  graph operations and returns a loss node; it does not call backward or update
+  parameters.
+- src/aurora/optim owns the proposed gradient-descent step: consume selected
+  parameter values and their numerical gradients and return updated parameter
+  leaves. It does not calculate predictions or gradients.
+- A caller connects prediction, loss construction, backward, update, and a fresh
+  forward pass. Current focused tests exercise these responsibilities; no new
+  standalone example or general training-loop framework is needed.
+- tests verifies the mechanisms; docs records decisions, explanations, and
+  limitations. Empty packages are reserved structure, not M3 implementation work.
+
+AutoNode arithmetic already performs numerical arithmetic on ordinary stored
+values and additionally records parent references and backward behavior. Plain
+number arithmetic should remain plain where no differentiable graph is needed,
+including derivative accumulation and numerical parameter updates. The M3 scalar
+engine intentionally pays Python-object and graph-storage costs per recorded
+operation for inspectability. Reimplementing a separate numerical arithmetic
+library is not required.
+
+The owner's initial gradient_descent_step prototype was reviewed without source
+changes. A direct execution with weight 2, bias 1, and MSE gradients [1, -1]
+returned the original parameter objects with values [2, 1], leaving the loss at
+2.5. The intended fresh-leaf update at learning rate 0.1 produces [1.9, 1.1] and a
+fresh-forward loss of 2.32. The unresolved concepts are rebinding a loop variable
+versus replacing container contents, and producing a parameter leaf versus an
+operation result connected to the previous graph. This targeted check does not
+establish correctness of the new optimizer function or change the existing
+33-test validation result for the previously tested components.
+
+The owner subsequently changed the update to calculate each new value with
+ordinary numerical arithmetic and collect fresh AutoNode leaves in a new list.
+A targeted execution verified values [1.9, 1.1], a fresh-forward loss of about
+2.32, empty parent tuples and zero initial gradients on updated parameters, and
+preservation of both the old parameters and their gradients after backward on the
+new graph. All 33 existing suite tests also pass. This targeted optimizer check
+was executed without adding a new persistent optimizer test module.
+
+The current autograd, nn, and optim packages share a representation but separate
+responsibilities: differentiation, model/loss calculation, and parameter updates.
+Their separation is a small organizational convention, not a mathematical
+requirement. Grouping all three under nodes or weights would obscure the fact
+that losses and inputs are also nodes, while only selected leaves are trainable
+parameters. Do not reorganize folders merely to maintain this convention.
+
+Python iteration binds the loop variable to the existing element object without
+copying that object. Rebinding the loop name changes that name's binding, not the
+list entry. Mutating a mutable object through either reference affects the shared
+object; replacing a list entry is a separate operation. The fresh-parameter API
+intentionally returns new objects rather than mutating old graph values.
+
+## Repeated learning check and remaining M3 work
+
+A direct execution on 2026-10-15 used inputs [-2, -1, 0, 1, 2], targets 2x + 1,
+initial weight and bias zero, and learning rate 0.1. Each update constructed a
+fresh prediction/MSE graph, called backward once, and used gradient_descent_step
+to create fresh parameter leaves. No training script or additional source function
+was added for this verification.
+
+The loss was 9 initially, 3.52 after one update, about 0.01182 after ten updates,
+and about 2.04e-10 after fifty updates. The final weight was approximately
+1.999999999984 and bias 0.999985727523. Thus the existing components can execute
+learning together, beyond merely returning individual correct local gradients.
+Targets were reused as constant leaves; their unused gradients may accumulate,
+but they are never included in the parameter update and do not affect prediction
+gradients under the current leaf no-op rule.
+
+Remaining learning evidence is the owner's explanation of how gradients from
+multiple samples accumulate into shared parameters, how graph lifetime relates to
+updates, and the roadmap's bounded conceptual comparison with PyTorch autograd.
+The successful numerical run does not by itself establish those competencies or
+justify adding more framework features.
