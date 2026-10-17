@@ -22,8 +22,8 @@ class FitTests(unittest.TestCase):
         self.assertIsNone(result)
         self.assertAlmostEqual(model.weight.value, 0.8)
         self.assertAlmostEqual(model.bias.value, 0.2)
-        self.assertAlmostEqual(model.predict(4.0), 3.4)
-        loss = sum((model.predict(x) - y) ** 2 for x, y in zip(INPUTS, TARGETS)) / 5
+        self.assertAlmostEqual(model.predict(4.0).value, 3.4)
+        loss = sum((model.predict(x).value - y) ** 2 for x, y in zip(INPUTS, TARGETS)) / 5
         self.assertAlmostEqual(loss, 3.52)
 
     def test_updated_parameters_are_fresh_leaves(self):
@@ -62,7 +62,7 @@ class FitTests(unittest.TestCase):
 
         self.assertAlmostEqual(model.weight.value, 2.0, delta=1e-8)
         self.assertAlmostEqual(model.bias.value, 1.0, delta=2e-5)
-        self.assertAlmostEqual(model.predict(4.0), 9.0, delta=2e-5)
+        self.assertAlmostEqual(model.predict(4.0).value, 9.0, delta=2e-5)
 
     def test_training_uses_the_supplied_targets(self):
         model = Aurora()
@@ -72,7 +72,7 @@ class FitTests(unittest.TestCase):
 
         self.assertAlmostEqual(model.weight.value, -3.0, delta=1e-8)
         self.assertAlmostEqual(model.bias.value, 2.0, delta=4e-5)
-        self.assertAlmostEqual(model.predict(4.0), -10.0, delta=4e-5)
+        self.assertAlmostEqual(model.predict(4.0).value, -10.0, delta=4e-5)
 
     def test_separate_fit_calls_continue_from_current_state(self):
         split, combined = Aurora(), Aurora()
@@ -95,7 +95,7 @@ class FitTests(unittest.TestCase):
         self.assertIsNone(result)
         self.assertIs(model.weight, weight)
         self.assertIs(model.bias, bias)
-        self.assertEqual(model.predict(4.0), 9.0)
+        self.assertEqual(model.predict(4.0).value, 9.0)
 
     def test_single_sample_still_updates_both_parameters(self):
         model = Aurora()
@@ -104,4 +104,4 @@ class FitTests(unittest.TestCase):
 
         self.assertAlmostEqual(model.weight.value, 2.0)
         self.assertAlmostEqual(model.bias.value, 1.0)
-        self.assertAlmostEqual(model.predict(2.0), 5.0)
+        self.assertAlmostEqual(model.predict(2.0).value, 5.0)
