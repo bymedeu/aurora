@@ -2,16 +2,16 @@
 
 Aurora M3 develops a scalar reverse-mode differentiation engine. This log records implementation contracts, validation evidence, owner preferences, and unresolved design questions. It is assistant-maintained engineering documentation, not owner-authored evidence of mathematical mastery.
 
-## M3 return brief — 2026-10-15
+## M3 return brief — updated 2026-10-17
 
 ### Session objective and ownership
 
-The next owner coding session should connect the existing components into one
-visible prototype in src/aurora/__main__.py. That file currently exists and is
-empty. The owner writes it; the assistant explains, reviews, and verifies it.
-Agreement with a goal does not authorize assistant source edits. Do not introduce
-more isolated operations, package reorganizations, or an automatic training
-framework before the owner can follow the complete learning calculation.
+The owner now wants an importable Aurora object, consumed by tests or small caller
+snippets, rather than a package executable. This supersedes the earlier __main__.py
+proposal. The initial object should represent one small trainable linear model,
+hold its current parameters, and expose training and prediction. The owner writes
+it with guidance; the assistant does not create the class or export without
+specific source-edit approval. The existing empty __main__.py is not a blocker.
 
 ### What M3 is and why it matters
 
@@ -32,9 +32,9 @@ The significance is this reusable mechanism, not the number or length of functio
 | Thing | Meaning | Where it lives |
 | --- | --- | --- |
 | Data | Known inputs and observed target answers. | Lists chosen by the prototype caller; values enter the graph as leaves. |
-| Model | The chosen form prediction = w*x + b. | The forward expression in the prototype. |
-| Learned state | The current numerical values of w and b. | Parameter AutoNode objects referenced by the caller. |
-| Training procedure | Repeated evaluation, differentiation, and parameter updates. | The prototype caller using the existing library functions. |
+| Model | The chosen prediction rule w*x + b, together with current parameter values. | The proposed Aurora object's prediction behavior and parameter state. |
+| Learned state | The current numerical values of w and b. | Parameter AutoNode objects owned by the model object. |
+| Training procedure | Repeated evaluation, differentiation, and parameter updates. | The proposed fit method using the existing library functions. |
 
 For the first controlled case, use inputs [-2, -1, 0, 1, 2] and target answers
 [-3, -1, 1, 3, 5]. The answers follow 2x + 1, but w and b must start at zero.
@@ -47,6 +47,19 @@ forward expression. There is no stored string "2x + 1" that the engine executes.
 Parameters remain in memory while the prototype runs; saving/loading a model is
 not implemented. Prediction on a new input uses those coefficients without a
 target, loss, backward pass, or update.
+
+A model is a parameterized prediction rule with current parameter values. The
+AutoNode graph is the record of a particular execution of that rule and, during
+training, the objective calculation following it. The persistent model object is
+not identical to a saved graph: a new forward creates a new graph, and MSE extends
+that graph beyond the predictions. A neuron is a model-level unit and may contain
+several scalar operations; the graph records those operations and also loss
+subtraction, squaring, summation, and division. It is not a list of neurons.
+
+MSE's additions and division are explicitly part of the definition
+sum((prediction - target)^2) / N. They are required for its value and derivatives.
+The mathematical loss is a scalar; loss.value is that scalar in this implementation.
+The returned AutoNode additionally retains the calculation needed by backward.
 
 ### How the mechanism works
 
@@ -78,11 +91,19 @@ update even though they also use AutoNode as their representation.
 
 ### The owner implementation task, expressed as behavior
 
-The prototype must own the data and current parameters, build predictions and a
-loss using the existing operations, request gradients, retain the returned updated
-parameters, and eventually predict for a new input. Keep these responsibilities
-visible in one place. Do not rewrite derivatives or initialize parameters to the
-known answer. A command-line parser is not needed for the first learning step.
+Proposed bounded interface: create an Aurora instance, call fit with input/target
+data and training settings, and call predict with a new input. The instance owns
+the current parameters. The caller supplies the data; the object does not need to
+store the dataset permanently. fit coordinates the existing loss, backward, and
+update functions. predict returns a numerical prediction; a training forward
+retains the AutoNode graph. Do not move every autograd helper into the class.
+
+A proposed location is src/aurora/model.py, with a root-package export in
+src/aurora/__init__.py so a caller can use "from aurora import Aurora". These are
+proposals for owner implementation, not permission for assistant edits. First
+agree on the model's state and prediction contract, then implement training using
+the existing components. Do not rewrite derivatives or initialize parameters to
+the known answer.
 
 Begin with one complete update. These are independent reference values for the
 five-pair dataset above, zero initial parameters, and learning rate 0.1:
@@ -100,10 +121,9 @@ The first-session target is being able to run and explain this complete step.
 
 Once that is understood, repeat the same procedure. In the assistant's prior
 50-update check, weight approached 2, bias approached 1, and MSE reached about
-2.04e-10. A held-out input 4 then predicts approximately 9. The prototype should
-be runnable from the repository root with PYTHONPATH=src python3 -B -m aurora
-after the owner implements its entrypoint. Merely having an empty __main__.py
-does not provide that behavior yet.
+2.04e-10. A held-out input 4 then predicts approximately 9. The owner prefers to
+observe this through an importable model used by tests or caller snippets. An
+executable __main__.py is not required for that interface.
 
 ### Readiness and remaining milestone evidence
 
@@ -125,10 +145,17 @@ A running prototype is evidence of integration, not an automatic competency scor
 Do not assign a new percentage until owner understanding has been reassessed.
 
 The longer-term goal is one usable prototype whose capabilities improve with each
-milestone. A future "from aurora import Aurora" interface may expose model creation,
-training, and prediction after those responsibilities are understood. It is a
-direction to discuss, not the next source class to implement or an authorization
-for the assistant to build it.
+milestone. "from aurora import Aurora" is now the requested prototype direction;
+the first API should be bounded to one understandable model rather than a general
+framework. Source implementation remains owner work unless explicitly delegated.
+
+Planning estimate for this bounded scope: roughly 10–20 focused hours for the
+remaining concept clarification, importable model integration, verification,
+debugging, short owner explanation, and introductory conceptual PyTorch comparison.
+A first runnable model may take around 3–6 hours within that work. These are rough
+estimates, not competency scores or a promised deadline; revisit after the first
+owner-written model. Do not expand into general network configuration or new
+autograd features while using this estimate.
 
 ## M3 working preferences
 

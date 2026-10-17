@@ -43,8 +43,9 @@ What is solid:
   evidence, not a new persistent test or proof of owner conceptual mastery.
 
 What is missing:
-- A visible, runnable Aurora program connecting the implemented components, and
-  owner understanding of its data, model parameters, training, and predictions.
+- An importable Aurora model connecting the implemented components, and owner
+  understanding of its data, model parameters, training, and predictions. The
+  owner prefers tests or caller snippets over an executable package entrypoint.
 - Give a concise owner-authored account of graph construction, chain-rule
   propagation, accumulation, graph lifetime, and known limitations.
 - Compare the learned concepts with PyTorch autograd after the first bounded
@@ -52,13 +53,13 @@ What is missing:
 
 Next smallest useful step:
 - Resume from the M3 return brief at the top of docs/notes/autograd_design.md:
-  understand the four distinct roles (data, model, learned state, training), then
-  implement and explain one complete update in the owner-created entrypoint.
-- Guide the owner in implementing a visible Aurora prototype that connects the
-  existing components and can train and predict. The owner created an empty
-  src/aurora/__main__.py; they own its implementation. Explain and agree on the
-  design before assigning implementation details. Do not interpret agreement on
-  the goal or "let's go" as authorization for assistant-written source.
+  distinguish the persistent model from a particular forward/loss graph, and
+  understand why MSE records arithmetic operations beyond model neurons.
+- Guide owner design of a bounded Aurora class holding parameters and exposing
+  fit and predict, proposed in src/aurora/model.py with a root-package export.
+  The empty __main__.py is not required. Agree on state and prediction behavior
+  before training implementation. No source edits have been authorized by merely
+  requesting this design guidance.
 
 Recommended resources:
 - The existing M0 mean-squared-error definition in docs/notes/linear_regression.md.
