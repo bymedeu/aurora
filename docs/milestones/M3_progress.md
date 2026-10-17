@@ -31,9 +31,11 @@ What is solid:
   the values used by backward.
 - `aurora.autograd` exposes the intended public API, while its tests live outside
   the source package and run through one repository-wide discovery command.
-- The local suite has 33 passing tests, including finite-difference comparisons,
-  sigmoid edge cases, the read-only value contract, cycle rejection, integer
-  powers, and MSE gradients reaching model parameters.
+- The suite is now organized into autograd, nn, optim, model, and integration
+  groups, with component and filename selectors. The latest run discovers 57
+  tests: 37 pass, eight fit behavior checks fail, and 12 checks encounter package
+  import errors. All 32 autograd tests and four model prediction tests pass. The
+  prior 33-test all-green snapshot does not describe the current working tree.
 - Power arguments are checked at runtime; the assistant added validation and
   corrected the MSE package import with explicit approval. The power composition
   and differentiable MSE calculation were implemented by the owner.
@@ -43,15 +45,21 @@ What is solid:
   evidence, not a new persistent test or proof of owner conceptual mastery.
 
 What is missing:
-- An importable Aurora model connecting the implemented components, and owner
-  understanding of its data, model parameters, training, and predictions. The
-  owner prefers tests or caller snippets over an executable package entrypoint.
+- Implement the saved fit stub and correct the nn/optim package imports. Test
+  failures must remain visible; no source changes were made during suite cleanup.
+- The Aurora class imports and predicts correctly. Its saved fit method is still
+  a stub: the remaining integration work is training through the existing loss,
+  backward, and update components, with owner understanding of those connections.
+  The owner prefers tests or caller snippets over an executable package entrypoint.
 - Give a concise owner-authored account of graph construction, chain-rule
   propagation, accumulation, graph lifetime, and known limitations.
 - Compare the learned concepts with PyTorch autograd after the first bounded
   PyTorch study in M4; this has not been demonstrated yet.
 
 Next smallest useful step:
+- Connect node-based prediction and MSE to the existing backward function, then
+  retain the fresh parameters returned by gradient_descent_step. backward fills
+  gradients on existing objects; the update function does not calculate them.
 - Resume from the M3 return brief at the top of docs/notes/autograd_design.md:
   distinguish the persistent model from a particular forward/loss graph, and
   understand why MSE records arithmetic operations beyond model neurons.

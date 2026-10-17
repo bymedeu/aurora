@@ -13,6 +13,30 @@ hold its current parameters, and expose training and prediction. The owner write
 it with guidance; the assistant does not create the class or export without
 specific source-edit approval. The existing empty __main__.py is not a blocker.
 
+The owner accepted the importable fit/predict interface on 2026-10-17. The next
+bounded implementation task is the class's initial parameter state and numerical
+prediction behavior. Optional initial weight/bias values allow deterministic
+forward checks; zero remains the default for later learning. The instance owns
+two AutoNode parameters, while predict returns an ordinary number for inference.
+Training will need connected node arithmetic rather than wrapping detached
+numerical predictions back into leaves. Interface agreement is not delegation of
+the source implementation.
+
+The saved class now constructs fresh weight/bias nodes and predict performs plain
+numerical inference. The next proposed fit contract accepts numerical input and
+target sequences, an update count, and a learning rate. It updates the instance's
+parameter references and returns None. One step means one full-batch MSE gradient
+calculation and parameter update. Training predictions must remain connected to
+the same current weight and bias nodes across the batch; public predict returns
+numbers and is not the graph-building training path. The existing update helper
+returns fresh leaves which fit must retain on the instance.
+
+First owner checkpoint: on the five-pair dataset in this brief, fit with one step
+and learning rate 0.1 changes initial weight/bias [0, 0] to [0.8, 0.2], making
+predict(4) approximately 3.4. The intended subsequent full-batch loss is 3.52.
+Use valid, equal-length non-empty data for this initial integration checkpoint;
+input-validation work is separate from demonstrating the core training path.
+
 ### What M3 is and why it matters
 
 M3 is scalar reverse-mode automatic differentiation. It records a calculation as
@@ -156,6 +180,37 @@ A first runnable model may take around 3–6 hours within that work. These are r
 estimates, not competency scores or a promised deadline; revisit after the first
 owner-written model. Do not expand into general network configuration or new
 autograd features while using this estimate.
+
+### Component suites and the pending fit implementation
+
+At the owner's explicit request, tests were split into autograd, nn, optim, model,
+and integration packages. Existing autograd checks were preserved, including the
+cycle check, powers, finite differences, and graph clearing. The original
+MSE-to-model gradient check now lives in integration. New checks cover numerical
+prediction, independent model state, MSE averaging, gradient-descent leaf/state
+contracts, and the agreed one-step and repeated fit behavior.
+
+tests/run.py supports group selection, filename patterns, --list, and --failfast.
+New component packages are discovered automatically. tests/README.md documents
+commands, extension conventions, and the distinction between assertion failures
+and execution/import errors. No missing-source behavior is mocked, skipped, or
+marked as an expected failure.
+
+The latest run discovers 57 tests: 37 pass, eight fit checks fail because the
+saved method is still pass, and 12 checks are blocked by the nn/optim __init__.py
+absolute imports of losses and gradient_descent. Those package mistakes affect
+multiple tests; they are not 12 separate mathematical defects. Source was left
+unchanged. The two relative-import corrections remain a proposed support edit
+requiring explicit owner approval.
+
+The connection fit needs is object identity: training predictions refer to the
+instance's weight/bias nodes; MSE extends those same dependencies into a loss
+node. backward(loss) traverses from that node and writes gradients into the same
+parameter objects. It returns no list of gradients and does not change parameter
+values. gradient_descent_step consumes those parameter objects and their stored
+numerical gradients, returning new leaves whose values follow the update rule.
+fit must retain those new objects as its state before the next forward graph.
+No second backward implementation or separate MSE backward callback is needed.
 
 ## M3 working preferences
 
