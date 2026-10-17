@@ -1,4 +1,4 @@
-"""Verify that scalar MSE retains connections to model parameters."""
+"""Check that loss construction remains connected to shared model parameters."""
 
 import unittest
 

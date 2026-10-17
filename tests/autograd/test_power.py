@@ -1,4 +1,4 @@
-"""Check integer powers against their values and analytical derivatives."""
+"""Integer power values, supported inputs, and analytical derivatives."""
 
 import unittest
 
