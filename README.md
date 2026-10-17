@@ -34,6 +34,33 @@ The objective is to understand every major component deeply enough to explain it
 
 ---
 
+## Current Status — October 17, 2026
+
+**M3 implementation is complete.** Aurora now includes scalar reverse-mode
+autograd, an importable linear model, a seven-parameter nonlinear training
+experiment, and 61 passing tests.
+
+The M3 delivery is **59 days ahead** of its December 15, 2026 deadline. The next
+work session is reserved for MyStarCeiling M2; Aurora resumes with the M4 entry
+review and PyTorch reconstruction. The short conceptual review of the chain
+rule, graph lifetime, complexity, and comparison with PyTorch remains recorded
+as the M4 entry task; this delivery status is not a new competency percentage.
+
+Run from the repository root:
+
+```bash
+python3 -B tests/run.py
+PYTHONPATH=src python3 -B examples/autograd/train.py
+PYTHONPATH=src python3 -B examples/autograd/nonlinear.py
+```
+
+The linear example prints its results. The nonlinear experiment currently runs
+silently; its regression test checks the final learned state. See
+[the example guide](examples/autograd/README.md) and
+[the M3 completion record](docs/milestones/M3_progress.md).
+
+---
+
 ## Philosophy
 
 Aurora follows a simple principle:
@@ -57,7 +84,7 @@ Only after a concept is understood from first principles does Aurora introduce h
 | M0        | Linear Regression         |
 | M1        | Single Neuron             |
 | M2        | Neural Networks           |
-| M3        | Automatic Differentiation |
+| M3        | Automatic Differentiation — implementation complete October 17, 2026 |
 | M4        | PyTorch Reconstruction    |
 | M5        | Attention                 |
 | M6        | Tiny Transformer          |
@@ -93,7 +120,7 @@ September 2027 is reserved for final presentation work and applications, not unf
 | Deadline | Deliverable |
 | -------- | ----------- |
 | September 30, 2026 | Complete M2: train XOR successfully and explain forward propagation, backpropagation, and the role of non-linearity. |
-| December 15, 2026 | Complete M3: working scalar autograd engine, focused tests, debugging evidence, and technical notes. |
+| December 15, 2026 | M3 implementation delivered October 17, 2026, 59 days early: scalar autograd, tested training prototypes, debugging evidence, and design notes. Conceptual review carries into the M4 entry session. |
 | February 28, 2027 | Complete M4: reconstruct the understood Aurora concepts in a manual PyTorch workflow and document the comparison. |
 | May 14, 2027 | Complete M5: implement, test, explain, and visualise attention on a small sequence. |
 | May 15–June 30, 2027 | LeetCode becomes the primary use of free time. Keep Aurora to light maintenance, review, and documentation; no critical milestone deadline falls in this period. |

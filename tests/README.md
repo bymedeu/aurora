@@ -14,7 +14,7 @@ python3 -B tests/run.py
 | `autograd/` | Scalar operations, ordering, backward, clearing, sigmoid, and powers. |
 | `nn/` | MSE values, averaging, gradients, and its public package export. |
 | `optim/` | Updates from supplied gradients, fresh leaves, old-state preservation, and the public export. |
-| `model/` | `from aurora import Aurora`, parameter state, numerical prediction, and `fit` behavior. |
+| `model/` | `from aurora import Aurora`, parameter state, connected prediction nodes, and `fit` behavior. |
 | `integration/` | Connections between loss construction, backward, and parameter updates. |
 
 ```bash
@@ -44,10 +44,12 @@ public interface. Integration tests prove connections without replacing missing
 library behavior with mocks. Invalid-input expectations should follow an agreed
 contract rather than inventing extra milestone requirements.
 
-`model/test_fit.py` contains normal checks for the agreed training behavior. An
-unfinished `fit` should fail these checks visibly. Do not skip them or mark them
-as expected failures just to obtain a green suite. Use the prediction or autograd
-selectors to check completed parts independently.
+The M3 implementation closeout on 2026-10-17 passes all 61 tests.
+`model/test_fit.py` verifies the implemented one-step and repeated linear training
+behavior. `integration/test_nonlinear_forward.py` checks nonlinear forward values,
+all seven output gradients against finite differences, and the actual training
+example's loss reduction and final parameter state. Regressions must remain
+visible; do not skip or mark them as expected failures to obtain a green suite.
 
 The teaching example in `integration/test_learning_step.py` shows that MSE builds
 the loss, backward writes gradients onto existing parameter nodes, and the update

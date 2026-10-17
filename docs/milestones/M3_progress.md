@@ -1,81 +1,72 @@
 Milestone: M3 — Autograd
 
-Progress assessment: reassessment required. The previous assistant-estimated 80%
-is withdrawn because it overstated owner understanding based on working code and
-assistant-assembled integration checks.
+Status: IMPLEMENTATION COMPLETE — 2026-10-17.
 
-Competency evidence:
-- Conceptual understanding: the owner reports feeling lost about how components
-  form a complete usable model. Resolve this before assigning a percentage.
-- Mathematical understanding: local derivative discussions exist, but independent
-  end-to-end explanation is not yet established.
-- Implementation: the inspected components pass their existing tests, and direct
-  integration checks show learning; this is not proof of independent mastery.
-- Debugging ability: owner corrections and assistant-authored checks provide
-  partial evidence; do not infer a competency score from a green suite.
-- Written explanation: assistant-maintained design notes are engineering records,
-  not owner-authored explanation evidence.
+The owner requested implementation closeout, commits, and publication after the
+working linear prototype and deeper nonlinear experiment were verified. M3's
+December 15, 2026 implementation deadline is met 59 days early. The next session
+is MyStarCeiling M2; Aurora returns for the M4 entry review and reconstruction.
 
-What is solid:
-- Scalar forward operations construct graph nodes with parent identity and local
-  backward behavior.
-- Reverse topological traversal handles chains, branches, shared intermediates,
-  and repeated operands.
-- Traversal uses separate visiting and visited sets, runs in average O(V + E)
-  time, and rejects cycles before backward mutates gradients.
-- Local rules accumulate the incoming gradient multiplied by the local derivative.
-- Explicit gradient clearing supports deliberate reuse of an unchanged graph.
-- Addition, subtraction, multiplication, division, and a numerically stable
-  sigmoid are implemented.
-- Forward values are exposed through a read-only property so recorded graphs keep
-  the values used by backward.
-- `aurora.autograd` exposes the intended public API, while its tests live outside
-  the source package and run through one repository-wide discovery command.
-- The suite is now organized into autograd, nn, optim, model, and integration
-  groups, with component and filename selectors. The latest run discovers 57
-  tests: 37 pass, eight fit behavior checks fail, and 12 checks encounter package
-  import errors. All 32 autograd tests and four model prediction tests pass. The
-  prior 33-test all-green snapshot does not describe the current working tree.
-- Power arguments are checked at runtime; the assistant added validation and
-  corrected the MSE package import with explicit approval. The power composition
-  and differentiable MSE calculation were implemented by the owner.
-- The owner implemented gradient_descent_step using fresh parameter leaves. A
-  direct 50-update check learning y = 2x + 1 reduced MSE from 9 to approximately
-  2.04e-10, with weight approaching 2 and bias approaching 1. This is execution
-  evidence, not a new persistent test or proof of owner conceptual mastery.
+This is an implementation delivery status, not a new competency percentage.
+The earlier assistant-estimated 80% remains withdrawn. The short independent
+conceptual review has not been completed and carries explicitly into M4.
 
-What is missing:
-- Implement the saved fit stub and correct the nn/optim package imports. Test
-  failures must remain visible; no source changes were made during suite cleanup.
-- The Aurora class imports and predicts correctly. Its saved fit method is still
-  a stub: the remaining integration work is training through the existing loss,
-  backward, and update components, with owner understanding of those connections.
-  The owner prefers tests or caller snippets over an executable package entrypoint.
-- Give a concise owner-authored account of graph construction, chain-rule
-  propagation, accumulation, graph lifetime, and known limitations.
-- Compare the learned concepts with PyTorch autograd after the first bounded
-  PyTorch study in M4; this has not been demonstrated yet.
+Evidence reviewed:
+- Scalar nodes record values, parent identity, and operation-specific backward
+  behavior. Public values are read-only; gradient fields remain mutable.
+- Arithmetic, non-negative integer powers, stable sigmoid, reverse topological
+  traversal, shared/repeated dependencies, cycle detection, gradient accumulation,
+  and explicit graph clearing are implemented and tested.
+- Traversal uses visiting/visited sets and an ordered result; its average cost is
+  O(V + E) time and O(V) additional space. Recursive depth remains a limitation.
+- MSE builds a differentiable scalar loss. Gradient descent reads stored
+  gradients and returns fresh parameter leaves without mutating old graph values.
+- The owner implemented Aurora in src/aurora/model.py, exported from the package
+  root. predict returns a connected AutoNode; fit trains the linear model using
+  the existing loss, backward, and update functions.
+- The linear caller trains on five pairs following y = 2x + 1. After 50 updates
+  at learning rate 0.1, MSE is approximately 2.037e-10 and predict(4).value is
+  approximately 8.999986.
+- The owner implemented a deeper example with two sigmoid hidden neurons, a
+  linear output, and seven explicit parameter nodes. All seven output gradients
+  agree with finite differences at two parameter/input configurations.
+- The nonlinear caller completes 50 updates at learning rate 0.1, reducing MSE
+  from 0.31281292252 to 0.00285574309. Final parameters are finite fresh leaves.
+- The current complete suite passes all 61 tests. The nonlinear training check
+  executes the actual example and evaluates its retained parameters independently
+  of the last pre-update loss graph.
 
-Next smallest useful step:
-- Connect node-based prediction and MSE to the existing backward function, then
-  retain the fresh parameters returned by gradient_descent_step. backward fills
-  gradients on existing objects; the update function does not calculate them.
-- Resume from the M3 return brief at the top of docs/notes/autograd_design.md:
-  distinguish the persistent model from a particular forward/loss graph, and
-  understand why MSE records arithmetic operations beyond model neurons.
-- Guide owner design of a bounded Aurora class holding parameters and exposing
-  fit and predict, proposed in src/aurora/model.py with a root-package export.
-  The empty __main__.py is not required. Agree on state and prediction behavior
-  before training implementation. No source edits have been authorized by merely
-  requesting this design guidance.
+Debugging and design evidence:
+- The owner corrected detached numerical predictions, nested node values,
+  forward activation versus backward callbacks, retaining updated parameters,
+  and prediction lists that accidentally spanned multiple training steps.
+- The Aurora class remains a specific two-parameter linear model. The nonlinear
+  experiment calls the reusable engine/loss/optimizer directly; no configurable
+  model framework was added to close M3.
+- Assistant-written tests and the linear caller verify behavior. The nonlinear
+  forward/training implementation and the model integration were owner work.
+  Assistant-maintained documentation is not owner-authored mastery evidence.
 
-Recommended resources:
-- The existing M0 mean-squared-error definition in docs/notes/linear_regression.md.
-- The M3 autograd design notes, especially graph and gradient lifecycle.
+Follow-up for the M4 entry session:
+- Explain how a hidden weight receives its loss gradient, why shared-path
+  contributions add, and why each update uses a fresh forward graph.
+- Explain traversal complexity and the current scalar/recursive limitations.
+- Make the bounded conceptual comparison with PyTorch autograd, then reconstruct
+  the familiar mechanisms in a manual PyTorch workflow.
 
-Do not do yet:
-- Do not add scalar neuron, optimizer, tensor, or transformer classes merely
-  to expand the framework.
-- Do not add a generic training framework or optimizer classes. A concrete,
-  inspectable fitting function may connect the existing components when needed
-  for understanding; keep prediction, loss, backward, and update visible.
+Known boundaries:
+- Reusing an unchanged graph requires explicit clearing before another backward
+  pass; stale intermediate gradients must not be reused accidentally.
+- Valid, equal-length, nonempty batches are the current training contract; a full
+  invalid-input policy has not been designed.
+- Scalar nodes, recursive traversal, and the fixed linear Aurora wrapper remain
+  deliberate limits. Tensor machinery and a generic model API are not M3 work.
+
+Resume commands (from the repository root):
+
+    python3 -B tests/run.py
+    PYTHONPATH=src python3 -B examples/autograd/train.py
+    PYTHONPATH=src python3 -B examples/autograd/nonlinear.py
+
+The nonlinear script currently runs silently; its test checks the learned result.
+Historical reports retain their dated assessments and are not current status.

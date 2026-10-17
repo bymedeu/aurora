@@ -50,11 +50,26 @@ This document outlines the milestones, learning objectives, restrictions, and co
 ## Milestone M3 — Autograd
 **Goal:** Build a tiny automatic differentiation engine.
 
-### Completion Criteria
-- [ ] The student can create a scalar computational graph.
-- [ ] The student can call `backward()`.
-- [ ] The student can explain the chain rule in the graph.
-- [ ] The student can compare their implementation conceptually to PyTorch autograd.
+**Status:** Implementation complete on **October 17, 2026**, 59 days before the
+December 15 deadline. The owner requested the milestone implementation closeout
+and a switch to MyStarCeiling M2. Aurora's next phase is M4 after a short entry
+review; independent conceptual mastery is not inferred from passing tests.
+
+### Delivered implementation
+- [x] Scalar computation graphs with parent identity and local backward rules.
+- [x] Reverse topological backward traversal and shared-gradient accumulation.
+- [x] Explicit gradient clearing and fresh parameter leaves after updates.
+- [x] Arithmetic, non-negative integer powers, and stable sigmoid.
+- [x] Differentiable MSE and gradient-descent parameter updates.
+- [x] An importable linear Aurora prototype and a seven-parameter nonlinear experiment.
+- [x] Numerical derivative checks, training regression checks, and 61 passing tests.
+
+### Learning review carried into the M4 entry session
+- [ ] Independently explain a hidden-weight chain-rule contribution, accumulation,
+      graph lifetime, and average traversal time/memory costs.
+- [ ] Compare the implementation conceptually to PyTorch autograd.
+
+See [M3 progress and completion evidence](milestones/M3_progress.md).
 
 ---
 

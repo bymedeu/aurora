@@ -2,6 +2,21 @@
 
 Aurora M3 develops a scalar reverse-mode differentiation engine. This log records implementation contracts, validation evidence, owner preferences, and unresolved design questions. It is assistant-maintained engineering documentation, not owner-authored evidence of mathematical mastery.
 
+## M3 implementation closeout — 2026-10-17
+
+M3 implementation is complete. The owner requested closeout and publication,
+with the next session on MyStarCeiling M2 and a later return for Aurora M4.
+The December 15, 2026 delivery deadline is met 59 days early. All 61 tests pass,
+including seven-parameter nonlinear derivative and repeated-training checks.
+The short independent conceptual review remains the M4 entry task; this record
+does not assert a new mastery percentage or a completed PyTorch comparison.
+
+The current implementation and handoff are summarized in
+[the M3 record](../milestones/M3_progress.md) and
+[the M4 handoff](../milestones/M4_progress.md). Earlier proposals,
+failed-test snapshots, ownership discussions, and time estimates below are
+historical records superseded by this closeout wherever they conflict.
+
 ## M3 return brief — updated 2026-10-17
 
 ### Session objective and ownership
@@ -11,29 +26,42 @@ snippets, rather than a package executable. This supersedes the earlier __main__
 proposal. The initial object should represent one small trainable linear model,
 hold its current parameters, and expose training and prediction. The owner writes
 it with guidance; the assistant does not create the class or export without
-specific source-edit approval. The existing empty __main__.py is not a blocker.
+specific source-edit approval. A package executable is not required.
 
-The owner accepted the importable fit/predict interface on 2026-10-17. The next
-bounded implementation task is the class's initial parameter state and numerical
-prediction behavior. Optional initial weight/bias values allow deterministic
-forward checks; zero remains the default for later learning. The instance owns
-two AutoNode parameters, while predict returns an ordinary number for inference.
-Training will need connected node arithmetic rather than wrapping detached
-numerical predictions back into leaves. Interface agreement is not delegation of
-the source implementation.
+The owner implemented the importable fit/predict interface on 2026-10-17.
+The instance owns fresh weight/bias AutoNode parameters, initially zero unless
+numerical initial values are supplied. The final agreed predict contract returns
+an AutoNode connected to these parameters; callers use prediction.value when
+only the number is needed. This supersedes the earlier numerical-predict proposal,
+which complicated the connection between prediction and training.
 
-The saved class now constructs fresh weight/bias nodes and predict performs plain
-numerical inference. The next proposed fit contract accepts numerical input and
-target sequences, an update count, and a learning rate. It updates the instance's
-parameter references and returns None. One step means one full-batch MSE gradient
-calculation and parameter update. Training predictions must remain connected to
-the same current weight and bias nodes across the batch; public predict returns
-numbers and is not the graph-building training path. The existing update helper
-returns fresh leaves which fit must retain on the instance.
+fit accepts numerical input/target lists, an update count, and a learning rate,
+and returns None. Each step builds connected predictions and a full-batch MSE,
+calls backward on that loss, and retains the fresh parameter leaves returned by
+gradient_descent_step. Predictions enter MSE directly; constructing a new leaf
+from a prediction's number loses its history, while storing a node as another
+node's value violates the scalar-value assumption. With fresh parameters and
+intermediates each step, stale graph gradients do not enter the next update.
+
+The complete 61-test suite passes at the latest checkpoint. At the owner's request,
+examples/autograd/train.py now demonstrates the real class through its public
+interface without duplicating training logic. The example is assistant-written;
+the model and training integration were implemented and debugged by the owner.
+
+The owner subsequently implemented examples/autograd/nonlinear.py, using two
+sigmoid hidden neurons and a linear output with seven explicit parameter nodes.
+This bounded M3 exercise calls the existing loss, backward, and update functions
+directly. The Aurora class remains the original two-parameter linear model; a
+configurable model wrapper is deferred. Inputs/targets persist, while each update
+builds fresh predictions and retains the optimizer's new parameter leaves. Tests
+check all seven output gradients by finite differences and execute the actual
+training caller. At 50 updates with learning rate 0.1, fresh evaluation gives MSE
+0.00285574309 from initial MSE 0.31281292252. This is deeper implementation and
+debugging evidence, not a declaration that conceptual M3 criteria are complete.
 
 First owner checkpoint: on the five-pair dataset in this brief, fit with one step
 and learning rate 0.1 changes initial weight/bias [0, 0] to [0.8, 0.2], making
-predict(4) approximately 3.4. The intended subsequent full-batch loss is 3.52.
+predict(4).value approximately 3.4. The intended subsequent full-batch loss is 3.52.
 Use valid, equal-length non-empty data for this initial integration checkpoint;
 input-validation work is separate from demonstrating the core training path.
 
@@ -56,9 +84,9 @@ The significance is this reusable mechanism, not the number or length of functio
 | Thing | Meaning | Where it lives |
 | --- | --- | --- |
 | Data | Known inputs and observed target answers. | Lists chosen by the prototype caller; values enter the graph as leaves. |
-| Model | The chosen prediction rule w*x + b, together with current parameter values. | The proposed Aurora object's prediction behavior and parameter state. |
+| Model | The chosen prediction rule w*x + b, together with current parameter values. | The Aurora object's prediction behavior and parameter state. |
 | Learned state | The current numerical values of w and b. | Parameter AutoNode objects owned by the model object. |
-| Training procedure | Repeated evaluation, differentiation, and parameter updates. | The proposed fit method using the existing library functions. |
+| Training procedure | Repeated evaluation, differentiation, and parameter updates. | The fit method using the existing library functions. |
 
 For the first controlled case, use inputs [-2, -1, 0, 1, 2] and target answers
 [-3, -1, 1, 3, 5]. The answers follow 2x + 1, but w and b must start at zero.
@@ -113,21 +141,14 @@ new one. Repeating backward on the same old graph without clearing is a differen
 unsupported accumulation usage. Keep inputs and targets out of the parameter
 update even though they also use AutoNode as their representation.
 
-### The owner implementation task, expressed as behavior
+### Delivered owner implementation
 
-Proposed bounded interface: create an Aurora instance, call fit with input/target
-data and training settings, and call predict with a new input. The instance owns
-the current parameters. The caller supplies the data; the object does not need to
-store the dataset permanently. fit coordinates the existing loss, backward, and
-update functions. predict returns a numerical prediction; a training forward
-retains the AutoNode graph. Do not move every autograd helper into the class.
-
-A proposed location is src/aurora/model.py, with a root-package export in
-src/aurora/__init__.py so a caller can use "from aurora import Aurora". These are
-proposals for owner implementation, not permission for assistant edits. First
-agree on the model's state and prediction contract, then implement training using
-the existing components. Do not rewrite derivatives or initialize parameters to
-the known answer.
+The owner implemented src/aurora/model.py and the root-package export. An Aurora
+instance owns its weight/bias parameters; fit coordinates the existing loss,
+backward, and update functions, and predict returns a connected AutoNode. The
+caller supplies data, and uses prediction.value for numerical display. The model
+stays a bounded linear prototype; the nonlinear example directly exercises the
+same library functions with a separate seven-parameter forward rule.
 
 Begin with one complete update. These are independent reference values for the
 five-pair dataset above, zero initial parameters, and learning rate 0.1:
@@ -149,7 +170,7 @@ Once that is understood, repeat the same procedure. In the assistant's prior
 observe this through an importable model used by tests or caller snippets. An
 executable __main__.py is not required for that interface.
 
-### Readiness and remaining milestone evidence
+### Conceptual review carried into M4
 
 Use the running prototype to explain the distinction between data, model state,
 forward calculation, derivative calculation, and update. Be able to trace one
@@ -163,7 +184,7 @@ and MSE-to-parameter connections. New prototype verification should check the
 owner's implementation rather than impose an assistant-written architecture.
 The current valid-batch MSE check does not establish a full invalid-input policy.
 
-Before declaring M3 complete, retain a short owner-authored explanation and make
+At the M4 entry session, retain a short owner-authored explanation and make
 the bounded conceptual comparison with PyTorch autograd named in the roadmap.
 A running prototype is evidence of integration, not an automatic competency score.
 Do not assign a new percentage until owner understanding has been reassessed.
@@ -173,7 +194,8 @@ milestone. "from aurora import Aurora" is now the requested prototype direction;
 the first API should be bounded to one understandable model rather than a general
 framework. Source implementation remains owner work unless explicitly delegated.
 
-Planning estimate for this bounded scope: roughly 10–20 focused hours for the
+Historical estimate, subsequently judged too broad for the remaining coding:
+roughly 10–20 focused hours for the
 remaining concept clarification, importable model integration, verification,
 debugging, short owner explanation, and introductory conceptual PyTorch comparison.
 A first runnable model may take around 3–6 hours within that work. These are rough
@@ -181,7 +203,7 @@ estimates, not competency scores or a promised deadline; revisit after the first
 owner-written model. Do not expand into general network configuration or new
 autograd features while using this estimate.
 
-### Component suites and the pending fit implementation
+### Historical component-suite and fit integration checkpoints
 
 At the owner's explicit request, tests were split into autograd, nn, optim, model,
 and integration packages. Existing autograd checks were preserved, including the
@@ -196,7 +218,7 @@ commands, extension conventions, and the distinction between assertion failures
 and execution/import errors. No missing-source behavior is mocked, skipped, or
 marked as an expected failure.
 
-The latest run discovers 57 tests: 37 pass, eight fit checks fail because the
+At the earlier unfinished-fit checkpoint, the run discovered 57 tests: 37 pass, eight fit checks fail because the
 saved method is still pass, and 12 checks are blocked by the nn/optim __init__.py
 absolute imports of losses and gradient_descent. Those package mistakes affect
 multiple tests; they are not 12 separate mathematical defects. Source was left
@@ -211,6 +233,21 @@ values. gradient_descent_step consumes those parameter objects and their stored
 numerical gradients, returning new leaves whose values follow the update rule.
 fit must retain those new objects as its state before the next forward graph.
 No second backward implementation or separate MSE backward callback is needed.
+
+The owner subsequently fixed both package exports with relative imports and added
+an initial fit body. That subsequent checkpoint had 49 passing tests and eight fit
+failures, with no import errors. MSE, the optimizer, and integration now import
+and pass their checks. The model's existing import from aurora.nn is the public
+loss interface; the implementation module is aurora.nn.losses, not aurora.losses.
+
+At that historical checkpoint, fit used numerical predict results to construct fresh prediction
+leaves, so the loss has no dependency path back to the model's parameter nodes.
+It updated those prediction objects rather than retaining new model parameters.
+It also kept appending predictions across steps, violating one-current-prediction
+per sample. A direct one-step check leaves the model's parameter values and
+gradients at zero. The next learning checkpoint is connected parameter gradients
+after one backward pass, before addressing repeated steps. Source was reviewed
+and executed without assistant changes.
 
 ## M3 working preferences
 
@@ -427,7 +464,7 @@ owner-written; its package import correction was assistant-written with approval
 The integration check covers a valid non-empty batch; it is not evidence of a
 completed policy for empty or mismatched inputs.
 
-The latest full checker run passes all 33 tests: 24 existing autograd tests,
+At the earlier power/MSE checkpoint, the checker passed all 33 tests: 24 existing autograd tests,
 eight power tests, and one MSE integration test. This supersedes the initial
 verification run with four failing unsupported-input subtests and one import
 error. The next learning step is interpreting and using the validated parameter
