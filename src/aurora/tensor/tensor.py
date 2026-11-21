@@ -33,10 +33,10 @@ def op_multiplication(node):
     par1.gradient += node.gradient * par0.value
 
 
-def op_sigmoid(node):
+def op_sum(node):
     assert len(node.parents) == 1
     par = node.parents[0]
-    par.gradient += node.gradient * node.value * (1 - node.value)
+    par.gradient += node.gradient
 
 
 def op_none(node):
@@ -92,3 +92,6 @@ class Tensor:
             b = b * b
             exp >>= 1
         return par
+
+    def sum(self):
+        return Tensor(self.value.sum(), parents=(self,), operation=op_sum)

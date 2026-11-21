@@ -45,10 +45,12 @@ experiment, and a recorded baseline of 61 passing tests.
 It extends Aurora's own differentiation machinery to NumPy arrays, without
 PyTorch. The first tensor checkpoint now covers floating-point array storage,
 independent values and gradients, graph metadata, and equal-shape addition with
-gradient accumulation. All **81 tests pass**, including 20 tensor checks.
+gradient accumulation. Full-array sum now connects array calculations to a
+scalar result and propagates gradients through earlier operations. All **88 tests
+pass**, including 27 tensor checks.
 No additional M3 entry review is required.
 
-M4 remains in progress. Tensor reductions, matrix operations, broadcasting
+M4 remains in progress. Further reductions, matrix operations, broadcasting
 derivatives, and network training remain to be implemented and verified.
 See [the M4 record](docs/milestones/M4_progress.md) for scope and limitations.
 

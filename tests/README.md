@@ -16,7 +16,7 @@ python3 -B tests/run.py
 | `optim/` | Updates from supplied gradients, fresh leaves, old-state preservation, and the public export. |
 | `model/` | `from aurora import Aurora`, parameter state, connected prediction nodes, and `fit` behavior. |
 | `integration/` | Connections between loss construction, backward, and parameter updates. |
-| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, local gradient accumulation, and scalar backward integration. |
+| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, local gradient accumulation, full-array sums, and backward integration. |
 
 ```bash
 python3 -B tests/run.py --list
@@ -24,6 +24,7 @@ python3 -B tests/run.py autograd
 python3 -B tests/run.py tensor
 python3 -B tests/run.py tensor -p test_construction.py
 python3 -B tests/run.py tensor -p test_addition.py
+python3 -B tests/run.py tensor -p test_sum.py
 python3 -B tests/run.py nn optim
 python3 -B tests/run.py model -p test_prediction.py
 python3 -B tests/run.py model -p test_fit.py --failfast
@@ -68,10 +69,14 @@ floating-point normalization; independent input and gradient storage; default
 zero gradients; and explicitly supplied gradients. The addition checks cover
 same-shaped operands, graph parent identity, forward state preservation,
 nonuniform incoming gradients, repeated operands, and the scalar backward entry
-point. Assertions describe the agreed behavior rather than changing the source.
+point. Seven sum checks cover full-array scalar results, parent identity, input
+preservation, accumulation of nonunit incoming gradients, backward through
+addition, repeated operands, and a composed gradient against finite differences.
+The full suite now passes 88 tests, including 27 tensor checks.
 
-This is the initial M4 checkpoint, not coverage of every copied arithmetic method
-or the whole milestone. Broadcasting derivatives, reductions, matrix
-multiplication, network training, and a broader invalid-input policy are outside
-this suite. A failure or error remains visible and returns a nonzero status;
+This M4 checkpoint does not cover every copied arithmetic method or the whole
+milestone. Broadcasting derivatives, axis-specific and mean reductions, matrix
+multiplication, network training, gradient clearing, and a broader invalid-input
+policy are outside this suite. A failure or error remains visible and returns a
+nonzero status;
 missing or broken behavior is not skipped or marked as an expected failure.

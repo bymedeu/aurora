@@ -1,6 +1,6 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
-Status: IN PROGRESS — initial tensor construction and addition checkpoint verified.
+Status: IN PROGRESS — tensor construction, addition, and full-array sum verified.
 Updated: 2026-11-21.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
@@ -21,21 +21,25 @@ Verified implementation evidence:
   for repeated operands.
 - Scalar tensor addition works with the existing backward entry point, retaining
   zero-dimensional array gradients.
-- The full suite passes all 81 tests: the existing 61 tests and 20 tensor checks.
+- Full-array sum returns a scalar Tensor linked to its input. Its backward rule
+  accumulates arbitrary scalar incoming gradients while preserving input shape.
+  Tests cover backward through addition, repeated operands, a later scalar
+  operation, and a composed array gradient against finite differences.
+- The full suite passes all 88 tests: the existing 61 tests and 27 tensor checks.
 
 Known boundaries:
-- This checkpoint verifies construction and equal-shape addition, not every
-  copied arithmetic method or a complete tensor differentiation engine.
+- This checkpoint verifies construction, equal-shape addition, and full-array sum,
+  not every copied arithmetic method or a complete tensor differentiation engine.
 - Gradient-shape validation and shape-preserving gradient clearing still need
   explicit coverage. General mutation and invalid-input policies remain bounded.
-- Broadcasting derivatives, sum/mean reductions, reshape/transpose, matrix
-  multiplication, and tensor-based network training are not delivered yet.
+- Broadcasting derivatives, axis-specific and mean reductions, reshape/transpose,
+  matrix multiplication, and tensor-based network training are not delivered yet.
 - Passing these tests is implementation evidence, not M4 completion or a new
   conceptual-understanding score.
 
 Next smallest useful step:
-- Explain one complete array-valued calculation ending in a scalar loss, then
-  implement a full-array sum reduction connected to the existing graph.
+- Establish shape-preserving gradient clearing for tensors, then verify that
+  clearing and repeating backward reproduces the same array gradients.
 
 Remaining milestone scope:
 - Establish tensor gradient accumulation, seeding, and clearing contracts.
