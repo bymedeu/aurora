@@ -13,8 +13,8 @@
       • You will need the derivatives of BCE loss with respect to w₁, w₂, and b.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 np.set_printoptions(precision=3)
 
@@ -39,7 +39,6 @@ class single_neuron:
         self.w1_ = w1
         self.w2_ = w2
         self.b_ = b
-        return
 
     def _sigmoid(self, z: np.ndarray) -> np.ndarray:
         return 1 / (1 + np.exp(np.clip(-z, -50, 50)))
@@ -71,8 +70,7 @@ for epoch in range(epochs):
     Wgrad = (z.T @ ((groups - YTrue) * groups * (1 - groups))).flatten() / size
     Bgrad = np.average(groups - YTrue)
     neuron.updateWeights(Wgrad[0], Wgrad[1], Bgrad)
-else:
-    print(f"{epochs}/{epochs} ran total")
+print(f"{epochs}/{epochs} ran total")
 
 
 res = neuron.getGroup(z) >= 0.5

@@ -1,7 +1,7 @@
 """Sigmoid forward values, chain rule, and numerical stability."""
 
-import unittest
 import math
+import unittest
 
 from aurora.autograd import AutoNode, backward
 
@@ -63,4 +63,3 @@ class SigmoidTests(unittest.TestCase):
                 backward(result)
                 self.assertTrue(math.isfinite(z.gradient))
                 self.assertAlmostEqual(z.gradient, 0.0, delta=1e-12)
-

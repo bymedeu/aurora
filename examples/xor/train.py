@@ -19,6 +19,8 @@ Start simple:
   4. Print the output shape and raw predictions to confirm matrix multiplication works.#
 """
 
+import itertools
+
 import numpy as np
 
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=float)
@@ -37,13 +39,13 @@ def sigmoid_prime(z):
     return sigmoid(z) * (1 - sigmoid(z))
 
 
-class Network(object):
+class Network:
     def __init__(self, sizes):
         self.num_layers = len(sizes)
         self.sizes = sizes
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(x, y) for x, y in zip(sizes[:-1], sizes[1:])]
-        self.zs = [np.array(0) for _ in zip(sizes[:-1], sizes[1:])]
+        self.weights = [np.random.randn(x, y) for x, y in itertools.pairwise(sizes)]
+        self.zs = [np.array(0) for _ in itertools.pairwise(sizes)]
         """
         print(self.weights[0])
         print(self.biases[0])

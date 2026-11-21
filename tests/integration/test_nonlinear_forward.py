@@ -1,12 +1,11 @@
 """Check nonlinear forward values, all seven gradients, and the training caller."""
 
 import math
-from pathlib import Path
 import runpy
 import unittest
+from pathlib import Path
 
 from aurora.autograd import AutoNode, backward
-
 
 EXAMPLE = Path(__file__).resolve().parents[2] / "examples/autograd/nonlinear.py"
 forward = runpy.run_path(str(EXAMPLE))["forward"]
@@ -21,7 +20,9 @@ def numeric_prediction(value, parameters):
 
 class NonlinearForwardTests(unittest.TestCase):
     def test_forward_matches_the_agreed_numerical_checkpoint(self):
-        parameters = [AutoNode(value) for value in (1.0, 0.0, -1.0, 0.0, 1.0, -1.0, 0.0)]
+        parameters = [
+            AutoNode(value) for value in (1.0, 0.0, -1.0, 0.0, 1.0, -1.0, 0.0)
+        ]
 
         prediction = forward(AutoNode(1.0), parameters)
 
@@ -52,8 +53,12 @@ class NonlinearForwardTests(unittest.TestCase):
                             numeric_prediction(value, plus)
                             - numeric_prediction(value, minus)
                         ) / (2 * epsilon)
-                        self.assertAlmostEqual(parameters[index].gradient, expected, delta=1e-8)
-                self.assertEqual(tuple(parameter.value for parameter in parameters), initial_values)
+                        self.assertAlmostEqual(
+                            parameters[index].gradient, expected, delta=1e-8
+                        )
+                self.assertEqual(
+                    tuple(parameter.value for parameter in parameters), initial_values
+                )
 
     def test_training_example_rebuilds_batches_and_reduces_loss(self):
         state = runpy.run_path(str(EXAMPLE), run_name="__main__")

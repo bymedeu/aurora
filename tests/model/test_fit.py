@@ -8,7 +8,6 @@ import unittest
 from aurora import Aurora
 from aurora.autograd import AutoNode
 
-
 INPUTS = [-2.0, -1.0, 0.0, 1.0, 2.0]
 TARGETS = [-3.0, -1.0, 1.0, 3.0, 5.0]
 
@@ -23,7 +22,9 @@ class FitTests(unittest.TestCase):
         self.assertAlmostEqual(model.weight.value, 0.8)
         self.assertAlmostEqual(model.bias.value, 0.2)
         self.assertAlmostEqual(model.predict(4.0).value, 3.4)
-        loss = sum((model.predict(x).value - y) ** 2 for x, y in zip(INPUTS, TARGETS)) / 5
+        loss = (
+            sum((model.predict(x).value - y) ** 2 for x, y in zip(INPUTS, TARGETS)) / 5
+        )
         self.assertAlmostEqual(loss, 3.52)
 
     def test_updated_parameters_are_fresh_leaves(self):

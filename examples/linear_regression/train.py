@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 a = 0.0
 b = 0.0
@@ -24,8 +24,8 @@ for epoch in range(epochs):
 
     loss = np.mean((estimated_y - est_lst) ** 2)
 
-    grad_a = -(2 / n) * np.sum((lst * (est_lst - (a * lst + b))))
-    grad_b = -(2 / n) * np.sum((est_lst - (a * lst + b)))
+    grad_a = -(2 / n) * np.sum(lst * (est_lst - (a * lst + b)))
+    grad_b = -(2 / n) * np.sum(est_lst - (a * lst + b))
     a = a - alpha * grad_a
     b = b - alpha * grad_b
 
