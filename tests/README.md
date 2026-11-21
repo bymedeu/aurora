@@ -16,10 +16,14 @@ python3 -B tests/run.py
 | `optim/` | Updates from supplied gradients, fresh leaves, old-state preservation, and the public export. |
 | `model/` | `from aurora import Aurora`, parameter state, connected prediction nodes, and `fit` behavior. |
 | `integration/` | Connections between loss construction, backward, and parameter updates. |
+| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, local gradient accumulation, and scalar backward integration. |
 
 ```bash
 python3 -B tests/run.py --list
 python3 -B tests/run.py autograd
+python3 -B tests/run.py tensor
+python3 -B tests/run.py tensor -p test_construction.py
+python3 -B tests/run.py tensor -p test_addition.py
 python3 -B tests/run.py nn optim
 python3 -B tests/run.py model -p test_prediction.py
 python3 -B tests/run.py model -p test_fit.py --failfast
@@ -55,3 +59,19 @@ The teaching example in `integration/test_learning_step.py` shows that MSE build
 the loss, backward writes gradients onto existing parameter nodes, and the update
 helper creates new parameter leaves. It is verification code, not a replacement
 for the owner implementing and understanding `Aurora.fit`.
+
+## Tensor checkpoint
+
+The tensor suite requires NumPy and is discovered by the existing runner. The
+construction checks cover scalar, vector, matrix, and higher-dimensional values;
+floating-point normalization; independent input and gradient storage; default
+zero gradients; and explicitly supplied gradients. The addition checks cover
+same-shaped operands, graph parent identity, forward state preservation,
+nonuniform incoming gradients, repeated operands, and the scalar backward entry
+point. Assertions describe the agreed behavior rather than changing the source.
+
+This is the initial M4 checkpoint, not coverage of every copied arithmetic method
+or the whole milestone. Broadcasting derivatives, reductions, matrix
+multiplication, network training, and a broader invalid-input policy are outside
+this suite. A failure or error remains visible and returns a nonzero status;
+missing or broken behavior is not skipped or marked as an expected failure.
