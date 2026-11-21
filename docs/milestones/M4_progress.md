@@ -1,6 +1,6 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
-Status: IN PROGRESS — tensor construction, addition, and full-array sum verified.
+Status: IN PROGRESS — tensor construction, addition, full-array sum, and clearing verified.
 Updated: 2026-11-21.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
@@ -25,21 +25,26 @@ Verified implementation evidence:
   accumulates arbitrary scalar incoming gradients while preserving input shape.
   Tests cover backward through addition, repeated operands, a later scalar
   operation, and a composed array gradient against finite differences.
-- The full suite passes all 88 tests: the existing 61 tests and 27 tensor checks.
+- The shared engine clears current AutoNode and Tensor graphs with class-specific
+  handling. Valid tensor gradients retain their shapes, values and graph metadata
+  remain unchanged, and unrelated nodes are untouched. Repeated clearing and
+  backward reproduce nonuniform array gradients.
+- The full suite passes all 91 tests: the existing 61 tests and 30 tensor checks.
 
 Known boundaries:
-- This checkpoint verifies construction, equal-shape addition, and full-array sum,
-  not every copied arithmetic method or a complete tensor differentiation engine.
-- Gradient-shape validation and shape-preserving gradient clearing still need
-  explicit coverage. General mutation and invalid-input policies remain bounded.
+- This checkpoint verifies construction, equal-shape addition, full-array sum,
+  and clearing for the current node classes, not every copied arithmetic method
+  or a complete tensor differentiation engine.
+- Gradient-shape validation still needs explicit coverage. General mutation and
+  invalid-input policies remain bounded.
 - Broadcasting derivatives, axis-specific and mean reductions, reshape/transpose,
   matrix multiplication, and tensor-based network training are not delivered yet.
 - Passing these tests is implementation evidence, not M4 completion or a new
   conceptual-understanding score.
 
 Next smallest useful step:
-- Establish shape-preserving gradient clearing for tensors, then verify that
-  clearing and repeating backward reproduces the same array gradients.
+- Verify equal-shape multiplication of distinct tensors through a scalar loss,
+  including nonuniform incoming gradients and numerical derivative comparisons.
 
 Remaining milestone scope:
 - Establish tensor gradient accumulation, seeding, and clearing contracts.

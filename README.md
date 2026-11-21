@@ -46,8 +46,9 @@ It extends Aurora's own differentiation machinery to NumPy arrays, without
 PyTorch. The first tensor checkpoint now covers floating-point array storage,
 independent values and gradients, graph metadata, and equal-shape addition with
 gradient accumulation. Full-array sum now connects array calculations to a
-scalar result and propagates gradients through earlier operations. All **88 tests
-pass**, including 27 tensor checks.
+scalar result and propagates gradients through earlier operations. Gradient
+clearing preserves tensor shapes and supports repeating backward on an unchanged
+graph. All **91 tests pass**, including 30 tensor checks.
 No additional M3 entry review is required.
 
 M4 remains in progress. Further reductions, matrix operations, broadcasting

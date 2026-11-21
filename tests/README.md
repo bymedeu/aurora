@@ -16,7 +16,7 @@ python3 -B tests/run.py
 | `optim/` | Updates from supplied gradients, fresh leaves, old-state preservation, and the public export. |
 | `model/` | `from aurora import Aurora`, parameter state, connected prediction nodes, and `fit` behavior. |
 | `integration/` | Connections between loss construction, backward, and parameter updates. |
-| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, local gradient accumulation, full-array sums, and backward integration. |
+| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, local gradient accumulation, full-array sums, shape-preserving clearing, and backward integration. |
 
 ```bash
 python3 -B tests/run.py --list
@@ -25,6 +25,7 @@ python3 -B tests/run.py tensor
 python3 -B tests/run.py tensor -p test_construction.py
 python3 -B tests/run.py tensor -p test_addition.py
 python3 -B tests/run.py tensor -p test_sum.py
+python3 -B tests/run.py tensor -p test_clearing.py
 python3 -B tests/run.py nn optim
 python3 -B tests/run.py model -p test_prediction.py
 python3 -B tests/run.py model -p test_fit.py --failfast
@@ -72,11 +73,13 @@ nonuniform incoming gradients, repeated operands, and the scalar backward entry
 point. Seven sum checks cover full-array scalar results, parent identity, input
 preservation, accumulation of nonunit incoming gradients, backward through
 addition, repeated operands, and a composed gradient against finite differences.
-The full suite now passes 88 tests, including 27 tensor checks.
+Three tensor clearing checks cover scalar, vector, matrix, and empty-array
+gradient shapes; preserved values and graph metadata; untouched unrelated nodes;
+and repeated clearing followed by backward on a graph with nonuniform gradients.
+The full suite now passes 91 tests, including 30 tensor checks.
 
 This M4 checkpoint does not cover every copied arithmetic method or the whole
 milestone. Broadcasting derivatives, axis-specific and mean reductions, matrix
-multiplication, network training, gradient clearing, and a broader invalid-input
-policy are outside this suite. A failure or error remains visible and returns a
-nonzero status;
-missing or broken behavior is not skipped or marked as an expected failure.
+multiplication, network training, and a broader invalid-input policy are outside
+this suite. A failure or error remains visible and returns a
+nonzero status; missing or broken behavior is not skipped or marked as an expected failure.
