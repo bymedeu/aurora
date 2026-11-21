@@ -1,15 +1,12 @@
 Milestone: M3 — Autograd
 
-Status: IMPLEMENTATION COMPLETE — 2026-10-17.
+Status: COMPLETE — 2026-10-17.
 
-The owner requested implementation closeout, commits, and publication after the
-working linear prototype and deeper nonlinear experiment were verified. M3's
-December 15, 2026 implementation deadline is met 59 days early. The next session
-is MyStarCeiling M2; Aurora returns for the M4 entry review and reconstruction.
-
-This is an implementation delivery status, not a new competency percentage.
-The earlier assistant-estimated 80% remains withdrawn. The short independent
-conceptual review has not been completed and carries explicitly into M4.
+Completion confirmed on 2026-11-04. M3 is closed; no additional entry review is
+required before M4. The earlier implementation-only status and carried-over review
+requirement are superseded. This correction records milestone closure; it does
+not invent a new competency score or claim an additional assessment took place.
+The implementation was delivered 59 days before the December 15, 2026 deadline.
 
 Evidence reviewed:
 - Scalar nodes record values, parent identity, and operation-specific backward
@@ -47,12 +44,11 @@ Debugging and design evidence:
   forward/training implementation and the model integration were owner work.
   Assistant-maintained documentation is not owner-authored mastery evidence.
 
-Follow-up for the M4 entry session:
-- Explain how a hidden weight receives its loss gradient, why shared-path
-  contributions add, and why each update uses a fresh forward graph.
-- Explain traversal complexity and the current scalar/recursive limitations.
-- Make the bounded conceptual comparison with PyTorch autograd, then reconstruct
-  the familiar mechanisms in a manual PyTorch workflow.
+Next milestone:
+- M4 — NumPy Tensors and Autograd: extend the scalar foundation to array-valued
+  operations and small trainable networks, using Python and NumPy.
+- Begin with tensor meaning, batches, broadcasting, and reductions. Revisit an
+  older concept only when a concrete question in the new work needs it.
 
 Known boundaries:
 - Reusing an unchanged graph requires explicit clearing before another backward

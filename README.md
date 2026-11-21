@@ -34,17 +34,23 @@ The objective is to understand every major component deeply enough to explain it
 
 ---
 
-## Current Status — October 17, 2026
+## Current Status — November 21, 2026
 
-**M3 implementation is complete.** Aurora now includes scalar reverse-mode
+**M3 is complete.** Its implementation was delivered on October 17, 2026,
+59 days before the December 15 deadline. Aurora includes scalar reverse-mode
 autograd, an importable linear model, a seven-parameter nonlinear training
-experiment, and 61 passing tests.
+experiment, and a recorded baseline of 61 passing tests.
 
-The M3 delivery is **59 days ahead** of its December 15, 2026 deadline. The next
-work session is reserved for MyStarCeiling M2; Aurora resumes with the M4 entry
-review and PyTorch reconstruction. The short conceptual review of the chain
-rule, graph lifetime, complexity, and comparison with PyTorch remains recorded
-as the M4 entry task; this delivery status is not a new competency percentage.
+**M4 — NumPy Tensors and Autograd** is now the active learning milestone.
+It extends Aurora's own differentiation machinery to NumPy arrays, without
+PyTorch. The first tensor checkpoint now covers floating-point array storage,
+independent values and gradients, graph metadata, and equal-shape addition with
+gradient accumulation. All **81 tests pass**, including 20 tensor checks.
+No additional M3 entry review is required.
+
+M4 remains in progress. Tensor reductions, matrix operations, broadcasting
+derivatives, and network training remain to be implemented and verified.
+See [the M4 record](docs/milestones/M4_progress.md) for scope and limitations.
 
 Run from the repository root:
 
@@ -73,7 +79,9 @@ Every concept is approached in three stages:
 2. Implement the mechanism.
 3. Compare with production-grade tools.
 
-Only after a concept is understood from first principles does Aurora introduce higher-level frameworks such as PyTorch.
+Aurora implements its learning mechanisms using Python and NumPy. Comparisons
+with production tools may provide context, but do not require a framework
+dependency or replace the from-scratch implementation.
 
 ---
 
@@ -84,8 +92,8 @@ Only after a concept is understood from first principles does Aurora introduce h
 | M0        | Linear Regression         |
 | M1        | Single Neuron             |
 | M2        | Neural Networks           |
-| M3        | Automatic Differentiation — implementation complete October 17, 2026 |
-| M4        | PyTorch Reconstruction    |
+| M3        | Automatic Differentiation — complete; implementation delivered October 17, 2026 |
+| M4        | NumPy Tensors and Autograd |
 | M5        | Attention                 |
 | M6        | Tiny Transformer          |
 
@@ -120,8 +128,8 @@ September 2027 is reserved for final presentation work and applications, not unf
 | Deadline | Deliverable |
 | -------- | ----------- |
 | September 30, 2026 | Complete M2: train XOR successfully and explain forward propagation, backpropagation, and the role of non-linearity. |
-| December 15, 2026 | M3 implementation delivered October 17, 2026, 59 days early: scalar autograd, tested training prototypes, debugging evidence, and design notes. Conceptual review carries into the M4 entry session. |
-| February 28, 2027 | Complete M4: reconstruct the understood Aurora concepts in a manual PyTorch workflow and document the comparison. |
+| December 15, 2026 | M3 complete; implementation delivered October 17, 2026, 59 days early: scalar autograd, tested training prototypes, debugging evidence, and design notes. |
+| February 28, 2027 | Previous M4 target, to reassess for the revised scope: NumPy tensor autograd and a small trainable network using Aurora mechanisms. |
 | May 14, 2027 | Complete M5: implement, test, explain, and visualise attention on a small sequence. |
 | May 15–June 30, 2027 | LeetCode becomes the primary use of free time. Keep Aurora to light maintenance, review, and documentation; no critical milestone deadline falls in this period. |
 | August 15, 2027 | Complete M6: reproducible tiny character-level transformer with correctness evidence and an initial technical write-up. |

@@ -1,21 +1,19 @@
 # Autograd design decisions
 
-Aurora M3 develops a scalar reverse-mode differentiation engine. This log records implementation contracts, validation evidence, owner preferences, and unresolved design questions. It is assistant-maintained engineering documentation, not owner-authored evidence of mathematical mastery.
+Aurora M3 develops a scalar reverse-mode differentiation engine. This log records
+implementation contracts, validation evidence, and design questions.
 
-## M3 implementation closeout — 2026-10-17
+## Current milestone status — 2026-11-04
 
-M3 implementation is complete. The owner requested closeout and publication,
-with the next session on MyStarCeiling M2 and a later return for Aurora M4.
-The December 15, 2026 delivery deadline is met 59 days early. All 61 tests pass,
-including seven-parameter nonlinear derivative and repeated-training checks.
-The short independent conceptual review remains the M4 entry task; this record
-does not assert a new mastery percentage or a completed PyTorch comparison.
+M3 is complete. The implementation was delivered on 2026-10-17; milestone closure
+was confirmed on 2026-11-04. No additional M3 entry review is required.
+M4 now extends Aurora's own engine to NumPy tensors. It does not require PyTorch.
+See the [M3 record](../milestones/M3_progress.md),
+[M4 record](../milestones/M4_progress.md), and [roadmap](../roadmap.md).
 
-The current implementation and handoff are summarized in
-[the M3 record](../milestones/M3_progress.md) and
-[the M4 handoff](../milestones/M4_progress.md). Earlier proposals,
-failed-test snapshots, ownership discussions, and time estimates below are
-historical records superseded by this closeout wherever they conflict.
+The dated sections below are historical design and debugging evidence. Their
+implementation-only closure wording, pending M3 entry review, and PyTorch M4
+direction are superseded by this status and the current project records.
 
 ## M3 return brief — updated 2026-10-17
 

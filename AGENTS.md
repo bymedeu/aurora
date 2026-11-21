@@ -153,16 +153,17 @@ Explain why a single linear model cannot solve XOR and explain both passes.
 ### M3 — Automatic Differentiation
 
 Build a small scalar computation graph with `backward()`. Explain the chain rule,
-topological traversal, gradient accumulation, ownership, and how the design relates
-conceptually to PyTorch autograd.
+topological traversal, gradient accumulation, and ownership.
 
-### M4 — PyTorch Reconstruction
+### M4 — NumPy Tensors and Autograd
 
-Recognize already-understood mechanisms inside PyTorch. Use tensors, autograd, and
-a manual training loop; explain `nn.Module`, `zero_grad()`, `backward()`, and
-`step()`. Investigate the layers from Python tensor operations through storage,
-metadata, dispatch, kernels, devices, and synchronization without trying to rebuild
-all of PyTorch.
+Build a small array-valued differentiation engine using Python and NumPy.
+Understand tensor shapes, batches, broadcasting, reductions, and gradient
+accumulation. Implement enough array operations and model structure to train
+a small network with Aurora's own backward and parameter updates. PyTorch and
+external automatic differentiation engines are not dependencies or requirements.
+Verify concrete behavior as implementation develops; keep the initial tensor
+lesson focused on meaning, data flow, and shapes.
 
 ### M5 — Attention
 

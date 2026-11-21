@@ -50,10 +50,9 @@ This document outlines the milestones, learning objectives, restrictions, and co
 ## Milestone M3 — Autograd
 **Goal:** Build a tiny automatic differentiation engine.
 
-**Status:** Implementation complete on **October 17, 2026**, 59 days before the
-December 15 deadline. The owner requested the milestone implementation closeout
-and a switch to MyStarCeiling M2. Aurora's next phase is M4 after a short entry
-review; independent conceptual mastery is not inferred from passing tests.
+**Status:** Complete. Implementation delivered on **October 17, 2026**, 59 days
+before the December 15 deadline; milestone closure confirmed on November 4, 2026.
+Aurora continues with M4, without an additional M3 entry review.
 
 ### Delivered implementation
 - [x] Scalar computation graphs with parent identity and local backward rules.
@@ -64,23 +63,30 @@ review; independent conceptual mastery is not inferred from passing tests.
 - [x] An importable linear Aurora prototype and a seven-parameter nonlinear experiment.
 - [x] Numerical derivative checks, training regression checks, and 61 passing tests.
 
-### Learning review carried into the M4 entry session
-- [ ] Independently explain a hidden-weight chain-rule contribution, accumulation,
-      graph lifetime, and average traversal time/memory costs.
-- [ ] Compare the implementation conceptually to PyTorch autograd.
-
 See [M3 progress and completion evidence](milestones/M3_progress.md).
 
 ---
 
-## Milestone M4 — PyTorch Reconstruction
-**Goal:** Learn PyTorch by recognizing concepts already implemented in Aurora.
+## Milestone M4 — NumPy Tensors and Autograd
+**Goal:** Build array-valued automatic differentiation and a small trainable
+network using Aurora's own mechanisms, Python, and NumPy.
+
+### Current focus
+- Tensor meaning, shapes, examples, features, and batches.
+- Broadcasting and reductions, explained with small numerical examples.
 
 ### Completion Criteria
-- [ ] The student can use PyTorch tensors.
-- [ ] The student can use PyTorch autograd.
-- [ ] The student can write a manual training loop.
-- [ ] The student can explain `nn.Module`, `optimizer.zero_grad()`, `loss.backward()`, and `optimizer.step()`.
+- [ ] Explain tensor values, shapes, dependencies, and gradients.
+- [ ] Implement a bounded set of array operations with automatic differentiation.
+- [ ] Explain and handle broadcasting, reductions, and gradient accumulation.
+- [ ] Train a small network using Aurora's own layers, loss, and parameter updates.
+- [ ] Verify the implemented mechanisms and document their behavior and limitations
+      when concrete implementation work is available.
+
+### Restrictions
+- Python and NumPy; no PyTorch or external automatic differentiation engine.
+- Keep correctness checks and cost analysis proportional to concrete work;
+  these are later implementation activities, not the current introductory lesson.
 
 ---
 
