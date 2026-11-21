@@ -90,3 +90,6 @@ class AutoNode:
             value = exponential / (1.0 + exponential)
 
         return AutoNode(value, (self,), op_sigmoid)
+
+    def clear_gradient(self):
+        self.gradient = 0

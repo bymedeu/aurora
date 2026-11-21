@@ -25,16 +25,20 @@ Verified implementation evidence:
   accumulates arbitrary scalar incoming gradients while preserving input shape.
   Tests cover backward through addition, repeated operands, a later scalar
   operation, and a composed array gradient against finite differences.
-- The shared engine clears current AutoNode and Tensor graphs with class-specific
-  handling. Valid tensor gradients retain their shapes, values and graph metadata
-  remain unchanged, and unrelated nodes are untouched. Repeated clearing and
-  backward reproduce nonuniform array gradients.
+- The shared engine delegates gradient clearing to each node through
+  clear_gradient(). AutoNode owns its scalar reset and Tensor owns its array
+  reset; the engine no longer imports Tensor or NumPy. Valid tensor gradients
+  retain their shapes, values and graph metadata remain unchanged, and unrelated
+  nodes are untouched. Repeated clearing and backward reproduce array gradients.
 - The full suite passes all 91 tests: the existing 61 tests and 30 tensor checks.
 
 Known boundaries:
 - This checkpoint verifies construction, equal-shape addition, full-array sum,
   and clearing for the current node classes, not every copied arithmetic method
   or a complete tensor differentiation engine.
+- Engine annotations still declare AutoNode inputs: Pyright accepts the three
+  changed source files but rejects a Tensor caller of backward/clear_gradients.
+  The common node typing contract remains to be defined.
 - Gradient-shape validation still needs explicit coverage. General mutation and
   invalid-input policies remain bounded.
 - Broadcasting derivatives, axis-specific and mean reductions, reshape/transpose,
@@ -43,8 +47,8 @@ Known boundaries:
   conceptual-understanding score.
 
 Next smallest useful step:
-- Verify equal-shape multiplication of distinct tensors through a scalar loss,
-  including nonuniform incoming gradients and numerical derivative comparisons.
+- Define the shared node typing contract so scalar and tensor callers are both
+  accepted by Pyright, then verify distinct-operand elementwise multiplication.
 
 Remaining milestone scope:
 - Establish tensor gradient accumulation, seeding, and clearing contracts.

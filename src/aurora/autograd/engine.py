@@ -1,7 +1,3 @@
-import numpy as np
-
-from aurora.tensor.tensor import Tensor
-
 from .scalar_node import AutoNode
 
 
@@ -37,7 +33,4 @@ def backward(output: AutoNode):
 def clear_gradients(output: AutoNode):
     L = _topological_order(output)
     for n in reversed(L):
-        if type(n) is AutoNode:
-            n.gradient = 0
-        if type(n) is Tensor:
-            n.gradient = np.zeros(n.gradient.shape)
+        n.clear_gradient()

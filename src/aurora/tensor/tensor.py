@@ -95,3 +95,6 @@ class Tensor:
 
     def sum(self):
         return Tensor(self.value.sum(), parents=(self,), operation=op_sum)
+
+    def clear_gradient(self):
+        self.gradient = np.zeros(self.gradient.shape)
