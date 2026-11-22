@@ -72,13 +72,15 @@ class Tensor:
     NumPy storage does not itself record Aurora graph dependencies.
 
     Attributes:
-        value: Owned array. The property has no assignment setter, but its contents
-            remain writable; this is not a general immutability guarantee.
-        gradient: Independently stored, writable float64 array. A valid gradient
-            matches the value shape; assignments do not yet validate that invariant.
-        parents: Immediate input nodes, empty for a directly constructed leaf.
-        operation: Local backward callback accepting this result node and returning
-            None. Leaf tensors use a no-op callback.
+
+    - `value`: Owned array. The property has no assignment setter, but its
+      contents remain writable; this is not a general immutability guarantee.
+    - `gradient`: Independently stored, writable float64 array. A valid
+      gradient matches the value shape; assignments do not yet validate that
+      invariant.
+    - `parents`: Immediate input nodes, empty for a directly constructed leaf.
+    - `operation`: Local backward callback accepting this result node and
+      returning None. Leaf tensors use a no-op callback.
 
     Forward broadcasting accepted by NumPy is not general backward support.
     """
@@ -86,12 +88,16 @@ class Tensor:
     def __init__(self, value, parents=(), operation=op_none, gradient=None) -> None:
         """Copy numerical inputs into owned float64 array storage.
 
-        Args:
-            value: Numerical scalar, sequence, or array, preserving its input shape.
-            parents: Immediate dependencies; empty for a directly constructed leaf.
-            operation: Local backward callback accepting this result tensor.
-            gradient: Initial gradient data copied independently. None creates zeros
-                matching the value shape. Supplied gradient shapes are not validated.
+        Parameters:
+
+        - `value`: Numerical scalar, sequence, or array, preserving its input
+          shape.
+        - `parents`: Immediate dependencies; empty for a directly constructed
+          leaf.
+        - `operation`: Local backward callback accepting this result tensor.
+        - `gradient`: Initial gradient data copied independently. None creates
+          zeros matching the value shape. Supplied gradient shapes are not
+          validated.
         """
         self._value = np.array(value, dtype=np.float64, copy=True)
         self.parents = parents
@@ -113,11 +119,7 @@ class Tensor:
 
     @gradient.setter
     def gradient(self, new_grad):
-        """Copy a supplied gradient into independent float64 storage.
-
-        Assignment preserves the supplied shape; it does not validate it against value
-        or calculate derivatives. The backward rules supply derivative contributions.
-        """
+        """Copy assigned gradient into owned float64 storage without shape validation."""
         self._gradient = np.array(new_grad, dtype=np.float64, copy=True)
 
     def __add__(self, other):
@@ -138,11 +140,13 @@ class Tensor:
     def __truediv__(self, other):
         """Return a connected quotient using the current scalar-oriented zero guard.
 
-        Args:
-            other: Denominator tensor.
+        Parameters:
+
+        - `other`: Denominator tensor.
 
         Raises:
-            ZeroDivisionError: The scalar zero guard detects a zero denominator.
+
+        - `ZeroDivisionError`: The scalar zero guard detects a zero denominator.
 
         Validation of general array denominators is not implemented; multi-element
         arrays can raise an ambiguous-truth-value error before the division.
@@ -154,12 +158,15 @@ class Tensor:
     def __pow__(self, exp: int):
         """Build a non-negative integer power from connected multiplications.
 
-        Args:
-            exp: Integer exponent. Zero returns a constant scalar tensor containing one.
+        Parameters:
+
+        - `exp`: Integer exponent. Zero returns a constant scalar tensor
+          containing one.
 
         Raises:
-            TypeError: The exponent is not an integer.
-            ValueError: The exponent is negative.
+
+        - `TypeError`: The exponent is not an integer.
+        - `ValueError`: The exponent is negative.
         """
         if not isinstance(exp, int):
             raise TypeError("Exponent must be an integer")
@@ -178,8 +185,9 @@ class Tensor:
         """Sum all array elements while preserving the graph connection.
 
         Returns:
-            A scalar Tensor with shape (), this tensor as its sole parent, and the
-            full-array sum backward rule. Axis selection is not supported.
+
+        - A scalar Tensor with shape (), this tensor as its sole parent, and the
+          full-array sum backward rule. Axis selection is not supported.
 
         Backward accumulates the scalar incoming gradient into every parent element.
         The forward calculation leaves input values and existing gradients unchanged.

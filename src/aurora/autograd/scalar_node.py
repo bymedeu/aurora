@@ -64,21 +64,25 @@ class AutoNode:
     and calls each stored operation to accumulate gradients into its parents.
 
     Attributes:
-        value: Numerical scalar exposed through a read-only property.
-        gradient: Mutable accumulated derivative of the differentiated objective.
-        parents: Immediate input nodes, retaining repeated operand positions.
-        operation: Local backward callback accepting this result node and returning
-            None; leaf nodes use a no-op callback.
+
+    - `value`: Numerical scalar exposed through a read-only property.
+    - `gradient`: Mutable accumulated derivative of the differentiated
+      objective.
+    - `parents`: Immediate input nodes, retaining repeated operand positions.
+    - `operation`: Local backward callback accepting this result node and
+      returning None; leaf nodes use a no-op callback.
     """
 
     def __init__(self, value, parents=(), operation=op_none, gradient=0) -> None:
         """Store the scalar state and the operation that produced it.
 
-        Args:
-            value: Numerical scalar represented by the node.
-            parents: Immediate dependencies; empty for a directly constructed leaf.
-            operation: Local backward callback accepting the result node.
-            gradient: Initial accumulated gradient, defaulting to zero.
+        Parameters:
+
+        - `value`: Numerical scalar represented by the node.
+        - `parents`: Immediate dependencies; empty for a directly constructed
+          leaf.
+        - `operation`: Local backward callback accepting the result node.
+        - `gradient`: Initial accumulated gradient, defaulting to zero.
         """
         self._value = value
         self.parents = parents
@@ -105,11 +109,13 @@ class AutoNode:
     def __truediv__(self, other):
         """Return a connected scalar quotient.
 
-        Args:
-            other: Denominator AutoNode.
+        Parameters:
+
+        - `other`: Denominator AutoNode.
 
         Raises:
-            ZeroDivisionError: The denominator value is zero.
+
+        - `ZeroDivisionError`: The denominator value is zero.
         """
         if other.value == 0:
             raise ZeroDivisionError
@@ -118,12 +124,14 @@ class AutoNode:
     def __pow__(self, exp: int):
         """Build a non-negative integer power from connected multiplications.
 
-        Args:
-            exp: Integer exponent. Zero returns a constant leaf containing one.
+        Parameters:
+
+        - `exp`: Integer exponent. Zero returns a constant leaf containing one.
 
         Raises:
-            TypeError: The exponent is not an integer.
-            ValueError: The exponent is negative.
+
+        - `TypeError`: The exponent is not an integer.
+        - `ValueError`: The exponent is negative.
         """
         if not isinstance(exp, int):
             raise TypeError("Exponent must be an integer")

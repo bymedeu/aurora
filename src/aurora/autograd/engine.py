@@ -10,14 +10,17 @@ from .scalar_node import AutoNode
 def _topological_order(output: AutoNode | Tensor):
     """Return reachable nodes with each parent preceding its dependent nodes.
 
-    Args:
-        output: Scalar or tensor node at the end of the graph.
+    Parameters:
+
+    - `output`: Scalar or tensor node at the end of the graph.
 
     Returns:
-        A list containing each reachable node once, with output last.
+
+    - A list containing each reachable node once, with output last.
 
     Raises:
-        ValueError: A cycle is found in the parent relationships.
+
+    - `ValueError`: A cycle is found in the parent relationships.
 
     This traversal does not execute operations or change gradients.
     """
@@ -45,8 +48,10 @@ def _topological_order(output: AutoNode | Tensor):
 def backward(output: AutoNode | Tensor):
     """Seed the output gradient and propagate contributions through its graph.
 
-    Args:
-        output: An exact AutoNode or Tensor instance with a valid recorded graph.
+    Parameters:
+
+    - `output`: An exact AutoNode or Tensor instance with a valid recorded
+      graph.
 
     An AutoNode output receives scalar seed 1. A Tensor output receives an array
     of ones with its current gradient shape, which must match its value shape.
@@ -58,7 +63,8 @@ def backward(output: AutoNode | Tensor):
     Clear the graph before repeating backward on the same intermediates.
 
     Raises:
-        ValueError: A cycle is found before any gradient is seeded.
+
+    - `ValueError`: A cycle is found before any gradient is seeded.
     """
     L = _topological_order(output)
     if type(output) == AutoNode:
@@ -73,15 +79,18 @@ def backward(output: AutoNode | Tensor):
 def clear_gradients(output: AutoNode | Tensor):
     """Ask every reachable node to reset its own gradient.
 
-    Args:
-        output: Scalar or tensor node whose ancestor gradients should be cleared.
+    Parameters:
+
+    - `output`: Scalar or tensor node whose ancestor gradients should be
+      cleared.
 
     Values, parent relationships, and backward operations remain unchanged.
     Nodes outside this graph are untouched. Each node owns the numerical reset
     behavior; Tensor resets preserve the current gradient array shape.
 
     Raises:
-        ValueError: A cycle is found before any gradients are cleared.
+
+    - `ValueError`: A cycle is found before any gradients are cleared.
     """
     L = _topological_order(output)
     for n in reversed(L):
