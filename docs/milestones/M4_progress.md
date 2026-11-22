@@ -1,7 +1,7 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
 Status: IN PROGRESS — tensor construction, addition, full-array sum, and clearing verified.
-Updated: 2026-11-21.
+Updated: 2026-11-22.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
 confirmed on 2026-11-04. No additional M3 entry review blocks M4.
@@ -27,18 +27,25 @@ Verified implementation evidence:
   operation, and a composed array gradient against finite differences.
 - The shared engine delegates gradient clearing to each node through
   clear_gradient(). AutoNode owns its scalar reset and Tensor owns its array
-  reset; the engine no longer imports Tensor or NumPy. Valid tensor gradients
-  retain their shapes, values and graph metadata remain unchanged, and unrelated
-  nodes are untouched. Repeated clearing and backward reproduce array gradients.
+  reset. Valid tensor gradients retain their shapes, values and graph metadata
+  remain unchanged, and unrelated nodes are untouched. Repeated clearing and
+  backward reproduce array gradients.
+- Engine input annotations now accept AutoNode or Tensor. Current output seeding
+  is class-specific: scalar one for AutoNode, or an all-ones array matching the
+  current Tensor gradient shape. With valid shapes and supported local rules,
+  a non-scalar Tensor seed differentiates the sum of its output elements.
+- Engine and node docstrings describe graph connections, gradient ownership,
+  accumulation, clearing, output seeding, and the limits of current array support.
 - The full suite passes all 91 tests: the existing 61 tests and 30 tensor checks.
 
 Known boundaries:
 - This checkpoint verifies construction, equal-shape addition, full-array sum,
   and clearing for the current node classes, not every copied arithmetic method
   or a complete tensor differentiation engine.
-- Engine annotations still declare AutoNode inputs: Pyright accepts the three
-  changed source files but rejects a Tensor caller of backward/clear_gradients.
-  The common node typing contract remains to be defined.
+- Union annotations accept the current scalar and tensor callers in basic
+  Pyright checks. Traversal containers and stored callbacks remain partially
+  inferred as Unknown; type completeness is not claimed. A Protocol is an
+  optional interface design, not a prerequisite for the next numerical step.
 - Gradient-shape validation still needs explicit coverage. General mutation and
   invalid-input policies remain bounded.
 - Broadcasting derivatives, axis-specific and mean reductions, reshape/transpose,
@@ -47,8 +54,8 @@ Known boundaries:
   conceptual-understanding score.
 
 Next smallest useful step:
-- Define the shared node typing contract so scalar and tensor callers are both
-  accepted by Pyright, then verify distinct-operand elementwise multiplication.
+- Explain and verify distinct-operand elementwise multiplication through a
+  scalar loss, including nonuniform incoming gradients and finite differences.
 
 Remaining milestone scope:
 - Establish tensor gradient accumulation, seeding, and clearing contracts.
