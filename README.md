@@ -34,7 +34,7 @@ The objective is to understand every major component deeply enough to explain it
 
 ---
 
-## Current Status — November 21, 2026
+## Current Status — November 23, 2026
 
 **M3 is complete.** Its implementation was delivered on October 17, 2026,
 59 days before the December 15 deadline. Aurora includes scalar reverse-mode
@@ -44,11 +44,11 @@ experiment, and a recorded baseline of 61 passing tests.
 **M4 — NumPy Tensors and Autograd** is now the active learning milestone.
 It extends Aurora's own differentiation machinery to NumPy arrays, without
 PyTorch. The first tensor checkpoint now covers floating-point array storage,
-independent values and gradients, graph metadata, and equal-shape addition with
-gradient accumulation. Full-array sum now connects array calculations to a
+independent values and gradients, graph metadata, and equal-shape addition and
+elementwise multiplication with gradient accumulation. Full-array sum now connects array calculations to a
 scalar result and propagates gradients through earlier operations. Gradient
 clearing preserves tensor shapes and supports repeating backward on an unchanged
-graph. All **91 tests pass**, including 30 tensor checks.
+graph. All **97 tests pass**, including 36 tensor checks.
 No additional M3 entry review is required.
 
 M4 remains in progress. Further reductions, matrix operations, broadcasting

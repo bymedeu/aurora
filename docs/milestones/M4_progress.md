@@ -1,71 +1,76 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
-Status: IN PROGRESS — tensor construction, addition, full-array sum, and clearing verified.
-Updated: 2026-11-22.
+Status: IN PROGRESS — construction, addition, multiplication, full-array sum,
+and gradient clearing verified.
+Updated: 2026-11-23.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
 confirmed on 2026-11-04. No additional M3 entry review blocks M4.
 
 Goal:
-- Combine NumPy array calculations with Aurora's own automatic differentiation
-  to train a small neural network. PyTorch is not a dependency or requirement.
+- Train a small array-based neural network using Aurora's own differentiation,
+  loss, and parameter updates, with Python and NumPy. PyTorch and external
+  automatic differentiation engines are not dependencies or requirements.
 
 Verified implementation evidence:
-- Tensor is exported from aurora.tensor. Numerical scalar, sequence, and array
-  inputs become independently owned float64 arrays with their shapes preserved.
-- Default gradients are zero arrays matching the value's shape. Valid explicitly
-  supplied gradients use independent float64 storage.
-- A directly constructed tensor has no parents and no local backward effect.
-- Equal-shape addition preserves parent identity and input state. Its local
-  backward rule accumulates nonuniform incoming gradients and both contributions
-  for repeated operands.
-- Scalar tensor addition works with the existing backward entry point, retaining
-  zero-dimensional array gradients.
-- Full-array sum returns a scalar Tensor linked to its input. Its backward rule
-  accumulates arbitrary scalar incoming gradients while preserving input shape.
-  Tests cover backward through addition, repeated operands, a later scalar
-  operation, and a composed array gradient against finite differences.
-- The shared engine delegates gradient clearing to each node through
-  clear_gradient(). AutoNode owns its scalar reset and Tensor owns its array
-  reset. Valid tensor gradients retain their shapes, values and graph metadata
-  remain unchanged, and unrelated nodes are untouched. Repeated clearing and
-  backward reproduce array gradients.
-- Engine input annotations now accept AutoNode or Tensor. Current output seeding
-  is class-specific: scalar one for AutoNode, or an all-ones array matching the
-  current Tensor gradient shape. With valid shapes and supported local rules,
-  a non-scalar Tensor seed differentiates the sum of its output elements.
-- Engine and node docstrings describe graph connections, gradient ownership,
-  accumulation, clearing, output seeding, and the limits of current array support.
-- The full suite passes all 91 tests: the existing 61 tests and 30 tensor checks.
+- Tensor is exported from aurora.tensor. Scalars, sequences, and arrays become
+  independently owned float64 arrays with their numerical shapes preserved.
+- Default gradients are zero arrays matching the value shape. Valid supplied
+  gradients are copied into independent float64 storage.
+- Directly constructed leaves have no parents and a no-op backward callback.
+- Equal-shape addition and elementwise multiplication retain parent identity,
+  preserve input state, accumulate nonuniform incoming gradients, and account
+  for repeated operands. Distinct multiplication operand gradients agree with
+  finite differences of a weighted scalar objective.
+- Full-array sum returns a scalar Tensor connected to its input and distributes
+  arbitrary scalar incoming gradients across the parent array. Tests cover
+  composed graphs and gradient flow through earlier operations.
+- Graph clearing delegates to each node's clear_gradient method, preserving
+  valid gradient shapes, values and graph metadata. Unrelated nodes are untouched;
+  repeated clearing and backward reproduce nonuniform array gradients.
+- Engine annotations accept AutoNode or Tensor. Current output seeding is
+  class-specific: scalar one for AutoNode, or ones matching the current Tensor
+  gradient shape. For valid shapes and supported operations, a non-scalar seed
+  differentiates the sum of output elements.
+- Docstrings describe current behavior using Markdown-friendly sections and
+  bullet lists. Actual Pyright Markdown and plaintext hover responses were checked.
+- All 97 tests pass: the existing 61 scalar/model checks and 36 tensor checks.
 
 Known boundaries:
-- This checkpoint verifies construction, equal-shape addition, full-array sum,
-  and clearing for the current node classes, not every copied arithmetic method
-  or a complete tensor differentiation engine.
-- Union annotations accept the current scalar and tensor callers in basic
-  Pyright checks. Traversal containers and stored callbacks remain partially
-  inferred as Unknown; type completeness is not claimed. A Protocol is an
-  optional interface design, not a prerequisite for the next numerical step.
-- Gradient-shape validation still needs explicit coverage. General mutation and
-  invalid-input policies remain bounded.
-- Broadcasting derivatives, axis-specific and mean reductions, reshape/transpose,
-  matrix multiplication, and tensor-based network training are not delivered yet.
-- Passing these tests is implementation evidence, not M4 completion or a new
-  conceptual-understanding score.
+- This checkpoint does not verify every copied arithmetic method or provide a
+  complete tensor differentiation engine. Subtraction, division, and powers still
+  need focused array review; division's denominator validation is scalar-oriented.
+- NumPy accepting a broadcast forward expression does not establish correct
+  broadcasting derivatives. Parent gradient shapes must be restored explicitly.
+- Mean, selected-axis reductions, reshape/transpose, matrix multiplication, an
+  array activation, and tensor-based network training are not delivered yet.
+- Supplied and assigned gradient shapes are not validated. Mutation and invalid
+  input policies remain limited to the current supported use cases.
+- Basic Pyright checks accept both current node classes, but traversal containers
+  and callbacks still contain inferred Unknown types. A Protocol or file-layout
+  refactor is optional and does not block the next numerical implementation step.
+- Passing tests is implementation evidence; it does not establish M4 completion
+  or assign a conceptual-understanding score.
 
 Next smallest useful step:
-- Explain and verify distinct-operand elementwise multiplication through a
-  scalar loss, including nonuniform incoming gradients and finite differences.
+- Implement a full-array Tensor.mean() for non-empty inputs, retaining a scalar
+  graph result. For N elements, each input receives incoming_gradient / N,
+  accumulated into its existing gradient. Selected axes are a later extension.
 
 Remaining milestone scope:
-- Establish tensor gradient accumulation, seeding, and clearing contracts.
-- Implement and verify the needed elementwise operations and activation.
-- Add reductions, shape operations, matrix multiplication, and broadcasting
-  backward rules while preserving each parent's gradient shape.
-- Train a small network using Aurora parameters, loss, and updates; retain
-  reproducible correctness checks and a technical explanation of the mechanisms.
+- Finish the needed elementwise arithmetic and verify its array gradients.
+- Add mean and the selected-axis reductions needed by subsequent operations.
+- Implement broadcasting backward rules and the required reshape/transpose rules.
+- Add matrix multiplication and one array activation, sufficient for a small network.
+- Enforce gradient-shape invariants and document the supported mutation/seeding
+  behavior without building a general-purpose validation framework.
+- Supply minimum layer/parameter structure, a tensor loss, and tensor parameter
+  updates. Existing M3 model, loss, and update helpers remain scalar-oriented.
+- Train a small network on batches, with reproducible correctness and loss-reduction
+  evidence, then explain its shapes, gradient flow, and main computational costs.
 
 Planning:
-- February 28, 2027 is the previously recorded M4 target. Reassess it against
-  the revised NumPy implementation scope; no new estimate is asserted here.
-- M4 remains incomplete. No new competency percentage has been assigned.
+- February 28, 2027 is the previously recorded M4 target. Reassess it against the
+  revised NumPy scope; no new estimate or competency percentage is asserted here.
+- M4 remains incomplete. Dataset loaders, GPU execution, a broad framework API,
+  and external-autograd comparisons are not prerequisites for this checkpoint.
