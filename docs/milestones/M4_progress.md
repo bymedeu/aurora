@@ -1,7 +1,7 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
-Status: IN PROGRESS — construction, addition, multiplication, full-array sum,
-non-empty full-array mean, and gradient clearing verified.
+Status: IN PROGRESS — construction, equal-shape addition, subtraction, and
+multiplication, full-array sum, non-empty full-array mean, and gradient clearing verified.
 Updated: 2026-11-24.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
@@ -29,6 +29,8 @@ Verified implementation evidence:
   incoming_gradient / total_element_count into each input gradient entry. Seven
   tests cover input ranks and preservation, nonunit gradients, earlier operations,
   repeated operands, and composed gradients against finite differences.
+- Equal-shape subtraction preserves operand order and accumulates opposite
+  gradients through a weighted loss. Repeated operand contributions cancel.
 - Graph clearing delegates to each node's clear_gradient method, preserving
   valid gradient shapes, values and graph metadata. Unrelated nodes are untouched;
   repeated clearing and backward reproduce nonuniform array gradients.
@@ -38,12 +40,12 @@ Verified implementation evidence:
   differentiates the sum of output elements.
 - Docstrings describe current behavior using Markdown-friendly sections and
   bullet lists. Actual Pyright Markdown and plaintext hover responses were checked.
-- All 104 tests pass: the existing 61 scalar/model checks and 43 tensor checks.
+- All 107 tests pass: the existing 61 scalar/model checks and 46 tensor checks.
 
 Known boundaries:
 - This checkpoint does not verify every copied arithmetic method or provide a
-  complete tensor differentiation engine. Subtraction, division, and powers still
-  need focused array review; division's denominator validation is scalar-oriented.
+  complete tensor differentiation engine. Division and powers still need focused
+  array review; division's denominator validation is scalar-oriented.
 - NumPy accepting a broadcast forward expression does not establish correct
   broadcasting derivatives. Parent gradient shapes must be restored explicitly.
 - Selected-axis reductions, reshape/transpose, matrix multiplication, an array
@@ -58,9 +60,8 @@ Known boundaries:
   or assign a conceptual-understanding score.
 
 Next smallest useful step:
-- Review the remaining elementwise operations with equal-shaped array inputs,
-  starting with subtraction. Verify forward results, nonuniform incoming gradient
-  accumulation, and composed derivatives before extending the supported shapes.
+- Support division for equal-shaped inputs with nonzero denominators. Keep the
+  zero-denominator check and verify forward values and both operand gradients.
 
 Remaining milestone scope:
 - Finish the needed elementwise arithmetic and verify its array gradients.
