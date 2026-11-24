@@ -16,7 +16,7 @@ python3 -B tests/run.py
 | `optim/` | Updates from supplied gradients, fresh leaves, old-state preservation, and the public export. |
 | `model/` | `from aurora import Aurora`, parameter state, connected prediction nodes, and `fit` behavior. |
 | `integration/` | Connections between loss construction, backward, and parameter updates. |
-| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, subtraction, and multiplication, local gradient accumulation, full-array sums and non-empty means, shape-preserving clearing, and backward integration. |
+| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition, subtraction, multiplication, and division, local gradient accumulation, full-array sums and non-empty means, shape-preserving clearing, and backward integration. |
 
 ```bash
 python3 -B tests/run.py --list
@@ -26,6 +26,7 @@ python3 -B tests/run.py tensor -p test_construction.py
 python3 -B tests/run.py tensor -p test_addition.py
 python3 -B tests/run.py tensor -p test_subtraction.py
 python3 -B tests/run.py tensor -p test_multiplication.py
+python3 -B tests/run.py tensor -p test_division.py
 python3 -B tests/run.py tensor -p test_sum.py
 python3 -B tests/run.py tensor -p test_mean.py
 python3 -B tests/run.py tensor -p test_clearing.py
@@ -89,8 +90,10 @@ backward through addition, repeated operands, and finite differences of the mean
 of squared values.
 Three subtraction checks cover equal-shape forward values and operand order,
 opposite gradient accumulation through a weighted loss, and cancellation
-when the same tensor appears on both sides. The full suite passes 107 tests,
-including 46 tensor checks.
+when the same tensor appears on both sides. Four division checks cover equal-shape
+forward values, zero denominators, gradient accumulation, and both operand
+gradients against finite differences. The full suite passes 111 tests, including
+50 tensor checks.
 
 This M4 checkpoint does not cover every copied arithmetic method or the whole
 milestone. Broadcasting derivatives, axis-specific reductions, empty-input means,

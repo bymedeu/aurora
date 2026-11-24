@@ -150,7 +150,7 @@ class Tensor:
         return Tensor(self.value * other.value, (self, other), op_multiplication)
 
     def __truediv__(self, other):
-        """Return a connected quotient using the current scalar-oriented zero guard.
+        """Divide elementwise and record both operand tensors as parents.
 
         Parameters:
 
@@ -158,12 +158,11 @@ class Tensor:
 
         Raises:
 
-        - `ZeroDivisionError`: The scalar zero guard detects a zero denominator.
+        - `ZeroDivisionError`: Any denominator element equals zero.
 
-        Validation of general array denominators is not implemented; multi-element
-        arrays can raise an ambiguous-truth-value error before the division.
+        Backward is verified for operands of equal shape.
         """
-        if other.value == 0:
+        if 0 in other.value:
             raise ZeroDivisionError
         return Tensor(self.value / other.value, (self, other), op_division)
 
