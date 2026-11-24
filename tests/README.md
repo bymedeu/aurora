@@ -27,6 +27,8 @@ python3 -B tests/run.py tensor -p test_addition.py
 python3 -B tests/run.py tensor -p test_subtraction.py
 python3 -B tests/run.py tensor -p test_multiplication.py
 python3 -B tests/run.py tensor -p test_division.py
+python3 -B tests/run.py tensor -p test_power.py
+python3 -B tests/run.py tensor -p test_shapes.py
 python3 -B tests/run.py tensor -p test_sum.py
 python3 -B tests/run.py tensor -p test_mean.py
 python3 -B tests/run.py tensor -p test_clearing.py
@@ -92,8 +94,11 @@ Three subtraction checks cover equal-shape forward values and operand order,
 opposite gradient accumulation through a weighted loss, and cancellation
 when the same tensor appears on both sides. Four division checks cover equal-shape
 forward values, zero denominators, gradient accumulation, and both operand
-gradients against finite differences. The full suite passes 111 tests, including
-50 tensor checks.
+gradients against finite differences. Four power checks cover shape preservation,
+constant ones for exponent zero, composed gradients, and invalid exponents. The
+shape check covers rejection of broadcastable operand shapes across the four
+binary arithmetic operators. The full suite passes 116 tests, including 55 tensor
+checks.
 
 This M4 checkpoint does not cover every copied arithmetic method or the whole
 milestone. Broadcasting derivatives, axis-specific reductions, empty-input means,

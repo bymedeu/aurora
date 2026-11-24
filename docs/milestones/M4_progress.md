@@ -1,8 +1,8 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
 Status: IN PROGRESS — construction, equal-shape addition, subtraction,
-multiplication, and division, full-array sum, non-empty full-array mean,
-and gradient clearing verified.
+multiplication, and division, integer powers, full-array sum, non-empty
+full-array mean, and gradient clearing verified.
 Updated: 2026-11-24.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
@@ -34,6 +34,9 @@ Verified implementation evidence:
   gradients through a weighted loss. Repeated operand contributions cancel.
 - Equal-shape division rejects any zero denominator element. Both operand
   gradients accumulate through a weighted loss and agree with finite differences.
+- Elementwise arithmetic rejects unequal operand shapes before graph construction.
+  Integer powers preserve input shape and compose equal-shape products. Zero
+  exponent produces a constant tensor of ones.
 - Graph clearing delegates to each node's clear_gradient method, preserving
   valid gradient shapes, values and graph metadata. Unrelated nodes are untouched;
   repeated clearing and backward reproduce nonuniform array gradients.
@@ -43,14 +46,11 @@ Verified implementation evidence:
   differentiates the sum of output elements.
 - Docstrings describe current behavior using Markdown-friendly sections and
   bullet lists. Actual Pyright Markdown and plaintext hover responses were checked.
-- All 111 tests pass: the existing 61 scalar/model checks and 50 tensor checks.
+- All 116 tests pass: the existing 61 scalar/model checks and 55 tensor checks.
 
 Known boundaries:
-- This checkpoint does not verify every copied arithmetic method or provide a
-  complete tensor differentiation engine. Array powers currently use a scalar
-  multiplier, which can cause backward to fail on multi-element arrays.
-- NumPy accepting a broadcast forward expression does not establish correct
-  broadcasting derivatives. Parent gradient shapes must be restored explicitly.
+- Tensor arithmetic currently requires equal shapes. Broadcast backward rules
+  will need to restore each parent gradient to its original shape.
 - Selected-axis reductions, reshape/transpose, matrix multiplication, an array
   activation, and tensor-based network training are not delivered yet. Mean is
   verified for non-empty inputs; its empty-input policy remains outside the contract.
@@ -63,12 +63,11 @@ Known boundaries:
   or assign a conceptual-understanding score.
 
 Next smallest useful step:
-- Check tensor power's internal multiplication shapes. Make array powers work
-  with equal-shape multiplication before introducing explicit shape checks
-  at the elementwise arithmetic entry points.
+- Work through the backward rule for broadcast addition. Start with a matrix
+  plus a vector and trace how contributions from the rows combine in the
+  vector gradient.
 
 Remaining milestone scope:
-- Finish the needed elementwise arithmetic and verify its array gradients.
 - Add the selected-axis reductions needed by subsequent operations.
 - Implement broadcasting backward rules and the required reshape/transpose rules.
 - Add matrix multiplication and one array activation, sufficient for a small network.

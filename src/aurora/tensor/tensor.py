@@ -137,16 +137,28 @@ class Tensor:
     def __add__(self, other):
         """Return a connected NumPy sum of this tensor and another Tensor.
 
-        The verified local backward rule covers operands of equal shape.
+        Raises ValueError if the operand shapes differ.
         """
+        if self.value.shape != other.value.shape:
+            raise ValueError(
+                f"Self.value.shape = {self.value.shape} when other.value.shape = {other.value.shape}"
+            )
         return Tensor(self.value + other.value, (self, other), op_addition)
 
     def __sub__(self, other):
-        """Return a connected elementwise difference from another Tensor."""
+        """Subtract elementwise, raising ValueError if the operand shapes differ."""
+        if self.value.shape != other.value.shape:
+            raise ValueError(
+                f"Self.value.shape = {self.value.shape} when other.value.shape = {other.value.shape}"
+            )
         return Tensor(self.value - other.value, (self, other), op_substraction)
 
     def __mul__(self, other):
-        """Return a connected elementwise product with another Tensor."""
+        """Multiply elementwise, raising ValueError if the operand shapes differ."""
+        if self.value.shape != other.value.shape:
+            raise ValueError(
+                f"Self.value.shape = {self.value.shape} when other.value.shape = {other.value.shape}"
+            )
         return Tensor(self.value * other.value, (self, other), op_multiplication)
 
     def __truediv__(self, other):
@@ -158,10 +170,13 @@ class Tensor:
 
         Raises:
 
+        - `ValueError`: The operand shapes differ.
         - `ZeroDivisionError`: Any denominator element equals zero.
-
-        Backward is verified for operands of equal shape.
         """
+        if self.value.shape != other.value.shape:
+            raise ValueError(
+                f"Self.value.shape = {self.value.shape} when other.value.shape = {other.value.shape}"
+            )
         if 0 in other.value:
             raise ZeroDivisionError
         return Tensor(self.value / other.value, (self, other), op_division)
@@ -171,8 +186,8 @@ class Tensor:
 
         Parameters:
 
-        - `exp`: Integer exponent. Zero returns a constant scalar tensor
-          containing one.
+        - `exp`: Integer exponent. Zero returns a constant tensor of ones
+          with the same shape as the input.
 
         Raises:
 
@@ -183,7 +198,7 @@ class Tensor:
             raise TypeError("Exponent must be an integer")
         if exp < 0:
             raise ValueError("Exponent must be non-negative")
-        par = Tensor(1)
+        par = Tensor(np.ones(self.value.shape))
         b = self
         while exp > 0:
             if exp & 1:
