@@ -16,7 +16,7 @@ python3 -B tests/run.py
 | `optim/` | Updates from supplied gradients, fresh leaves, old-state preservation, and the public export. |
 | `model/` | `from aurora import Aurora`, parameter state, connected prediction nodes, and `fit` behavior. |
 | `integration/` | Connections between loss construction, backward, and parameter updates. |
-| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition and multiplication, local gradient accumulation, full-array sums, shape-preserving clearing, and backward integration. |
+| `tensor/` | Value and gradient normalization/ownership, leaf state, equal-shape addition and multiplication, local gradient accumulation, full-array sums and non-empty means, shape-preserving clearing, and backward integration. |
 
 ```bash
 python3 -B tests/run.py --list
@@ -26,6 +26,7 @@ python3 -B tests/run.py tensor -p test_construction.py
 python3 -B tests/run.py tensor -p test_addition.py
 python3 -B tests/run.py tensor -p test_multiplication.py
 python3 -B tests/run.py tensor -p test_sum.py
+python3 -B tests/run.py tensor -p test_mean.py
 python3 -B tests/run.py tensor -p test_clearing.py
 python3 -B tests/run.py nn optim
 python3 -B tests/run.py model -p test_prediction.py
@@ -81,10 +82,13 @@ Six multiplication checks cover scalar/vector/matrix and empty-array forward
 results, parent identity, input preservation, nonuniform incoming gradients,
 accumulation into existing gradients, repeated operands, and a weighted scalar
 loss. Both distinct operand gradients are compared with finite differences.
-The full suite now passes 97 tests, including 36 tensor checks.
+Seven mean checks cover non-empty scalar/vector/matrix and higher-rank averages,
+input preservation, total element counts, scaled incoming gradient accumulation,
+backward through addition, repeated operands, and finite differences of the mean
+of squared values. The full suite now passes 104 tests, including 43 tensor checks.
 
 This M4 checkpoint does not cover every copied arithmetic method or the whole
-milestone. Broadcasting derivatives, axis-specific and mean reductions, matrix
-multiplication, network training, and a broader invalid-input policy are outside
-this suite. A failure or error remains visible and returns a nonzero status;
+milestone. Broadcasting derivatives, axis-specific reductions, empty-input means,
+matrix multiplication, network training, and a broader invalid-input policy are
+outside this suite. A failure or error remains visible and returns a nonzero status;
 missing or broken behavior is not skipped or marked as an expected failure.

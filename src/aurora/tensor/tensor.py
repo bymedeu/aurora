@@ -59,6 +59,18 @@ def op_sum(node):
     par.gradient += node.gradient
 
 
+def op_mean(node):
+    """Accumulate the incoming mean gradient divided by the input element count.
+
+    The single parent contains a non-empty array. Every element receives the
+    scalar incoming gradient divided by the total element count, preserving the
+    parent gradient shape and accumulating onto its existing entries.
+    """
+    assert len(node.parents) == 1
+    par = node.parents[0]
+    par.gradient += node.gradient / np.size(node.parents[0].value)
+
+
 def op_none(node):
     """Leave gradients unchanged for a tensor leaf without an operation."""
     return
@@ -202,3 +214,19 @@ class Tensor:
         traversed by this method.
         """
         self.gradient = np.zeros(self.gradient.shape)
+
+    def mean(self):
+        """Average all elements of a non-empty array, preserving its graph connection.
+
+        Returns:
+
+        - A scalar Tensor with shape (), this tensor as its sole parent, and a
+          backward rule that contributes the incoming gradient divided by the
+          total input element count to every parent element.
+
+        Axis selection and an empty-input policy are outside the supported contract.
+        Input values and existing gradients are unchanged by the forward calculation.
+        """
+        return Tensor(
+            self.sum().value / np.size(self.value), parents=(self,), operation=op_mean
+        )
