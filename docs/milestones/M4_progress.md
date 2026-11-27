@@ -1,9 +1,9 @@
 Milestone: M4 — NumPy Tensors and Autograd
 
-Status: IN PROGRESS — construction, equal-shape addition, subtraction,
+Status: IN PROGRESS — construction, broadcast addition, equal-shape subtraction,
 multiplication, and division, integer powers, full-array sum, non-empty
 full-array mean, and gradient clearing verified.
-Updated: 2026-11-24.
+Updated: 2026-11-27.
 
 M3 is complete, with implementation delivered on 2026-10-17 and milestone closure
 confirmed on 2026-11-04. No additional M3 entry review blocks M4.
@@ -34,7 +34,10 @@ Verified implementation evidence:
   gradients through a weighted loss. Repeated operand contributions cancel.
 - Equal-shape division rejects any zero denominator element. Both operand
   gradients accumulate through a weighted loss and agree with finite differences.
-- Elementwise arithmetic rejects unequal operand shapes before graph construction.
+- Addition supports NumPy-compatible broadcasting and reduces contributions to
+  each parent's original shape. Four tests cover matrix/vector operand order,
+  size-one and leading axes, scalar accumulation, and incompatible shapes.
+- Subtraction, multiplication, and division reject unequal operand shapes.
   Integer powers preserve input shape and compose equal-shape products. Zero
   exponent produces a constant tensor of ones.
 - Graph clearing delegates to each node's clear_gradient method, preserving
@@ -46,11 +49,11 @@ Verified implementation evidence:
   differentiates the sum of output elements.
 - Docstrings describe current behavior using Markdown-friendly sections and
   bullet lists. Actual Pyright Markdown and plaintext hover responses were checked.
-- All 116 tests pass: the existing 61 scalar/model checks and 55 tensor checks.
+- All 120 tests pass: the existing 61 scalar/model checks and 59 tensor checks.
 
 Known boundaries:
-- Tensor arithmetic currently requires equal shapes. Broadcast backward rules
-  will need to restore each parent gradient to its original shape.
+- Subtraction, multiplication, and division still require equal shapes.
+  The reduction helper assumes valid broadcast inputs and original parent shapes.
 - Selected-axis reductions, reshape/transpose, matrix multiplication, an array
   activation, and tensor-based network training are not delivered yet. Mean is
   verified for non-empty inputs; its empty-input policy remains outside the contract.
@@ -63,13 +66,13 @@ Known boundaries:
   or assign a conceptual-understanding score.
 
 Next smallest useful step:
-- Work through the backward rule for broadcast addition. Start with a matrix
-  plus a vector and trace how contributions from the rows combine in the
-  vector gradient.
+- Extend subtraction to compatible broadcast shapes. Preserve the positive
+  contribution to the left parent and negative contribution to the right parent,
+  reducing both to their original shapes before accumulation.
 
 Remaining milestone scope:
 - Add the selected-axis reductions needed by subsequent operations.
-- Implement broadcasting backward rules and the required reshape/transpose rules.
+- Extend broadcasting to the remaining arithmetic and add reshape/transpose rules.
 - Add matrix multiplication and one array activation, sufficient for a small network.
 - Enforce gradient-shape invariants and document the supported mutation/seeding
   behavior without building a general-purpose validation framework.

@@ -1,19 +1,43 @@
 """NumPy-backed graph nodes and their local array derivative rules."""
 
 import numpy as np
+from numpy.typing import NDArray
+
+
+def _reduce_to_shape(new_grad: NDArray[np.float64], original_shape: tuple[int, ...]):
+    """Combine broadcast gradient contributions into the original parent shape.
+
+    Parameters:
+
+    - `new_grad`: Incoming float64 gradient from a valid broadcast operation.
+    - `original_shape`: The parent's shape before broadcasting. Compatibility
+      with the incoming gradient is assumed.
+
+    Extra leading axes are summed away. Expanded size-one axes are summed while
+    retaining those axes. Returns the reduced array; if no reduction is needed,
+    the original array is returned. This helper does not accumulate into parents.
+    """
+    v = new_grad
+    while v.ndim > len(original_shape):
+        v = v.sum(axis=0)
+    for i, pos in enumerate(original_shape):
+        if pos == 1 and pos != v.shape[i]:
+            v = v.sum(axis=i, keepdims=True)
+
+    return v
 
 
 def op_addition(node):
     """Accumulate the incoming array gradient into both addition parents.
 
-    The current backward contract covers equal-shape operands; NumPy forward
-    broadcasting alone does not provide the required broadcast reduction rule.
+    Each parent receives the incoming gradient reduced to its original shape.
+    Contributions from reused entries are summed before accumulation.
     """
     assert len(node.parents) == 2
     par0 = node.parents[0]
     par1 = node.parents[1]
-    par0.gradient += node.gradient
-    par1.gradient += node.gradient
+    par0.gradient += _reduce_to_shape(node.gradient, par0.value.shape)
+    par1.gradient += _reduce_to_shape(node.gradient, par1.value.shape)
 
 
 def op_substraction(node):
@@ -137,12 +161,9 @@ class Tensor:
     def __add__(self, other):
         """Return a connected NumPy sum of this tensor and another Tensor.
 
-        Raises ValueError if the operand shapes differ.
+        NumPy handles broadcasting and raises ValueError for incompatible shapes.
+        Backward reduces each contribution to the corresponding parent's shape.
         """
-        if self.value.shape != other.value.shape:
-            raise ValueError(
-                f"Self.value.shape = {self.value.shape} when other.value.shape = {other.value.shape}"
-            )
         return Tensor(self.value + other.value, (self, other), op_addition)
 
     def __sub__(self, other):

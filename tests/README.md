@@ -24,6 +24,7 @@ python3 -B tests/run.py autograd
 python3 -B tests/run.py tensor
 python3 -B tests/run.py tensor -p test_construction.py
 python3 -B tests/run.py tensor -p test_addition.py
+python3 -B tests/run.py tensor -p test_broadcast_addition.py
 python3 -B tests/run.py tensor -p test_subtraction.py
 python3 -B tests/run.py tensor -p test_multiplication.py
 python3 -B tests/run.py tensor -p test_division.py
@@ -96,12 +97,13 @@ when the same tensor appears on both sides. Four division checks cover equal-sha
 forward values, zero denominators, gradient accumulation, and both operand
 gradients against finite differences. Four power checks cover shape preservation,
 constant ones for exponent zero, composed gradients, and invalid exponents. The
-shape check covers rejection of broadcastable operand shapes across the four
-binary arithmetic operators. The full suite passes 116 tests, including 55 tensor
-checks.
+shape check covers rejection of unequal operands for subtraction, multiplication,
+and division. Four broadcast addition checks cover both operand orders,
+reductions of extra leading and expanded size-one axes, scalar accumulation,
+and incompatible shapes. The full suite passes 120 tests, including 59 tensor checks.
 
 This M4 checkpoint does not cover every copied arithmetic method or the whole
-milestone. Broadcasting derivatives, axis-specific reductions, empty-input means,
+milestone. Broadcasting for other arithmetic, axis-specific reductions, empty-input means,
 matrix multiplication, network training, and a broader invalid-input policy are
 outside this suite. A failure or error remains visible and returns a nonzero status;
 missing or broken behavior is not skipped or marked as an expected failure.
